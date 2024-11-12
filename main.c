@@ -33,7 +33,7 @@ void init_spi1_slow(void) {
     SPI1->CR1 = 0;   // Reset all SPI1 settings
 
     // Set SPI1 in master mode, with 8-bit data size
-    SPI1->CR1 |= SPI_CR1_MSTR | SPI_CR1_DFF;    // Master mode, 8-bit data size
+    SPI1->CR1 |= SPI_CR1_MSTR | (7<<8);    // Master mode, 8-bit data size
     SPI1->CR1 |= SPI_CR1_SSM | SPI_CR1_SSI;     // Enable software slave management and internal slave select
 
     // Set the baud rate divisor to the maximum value for the slowest baud rate
@@ -47,11 +47,11 @@ void init_spi1_slow(void) {
 }
 
 void enable_sdcard(void) {
-    GPIOB->ODR &= ~GPIO_ODR_OD2;  // Set PB2 low to enable SD card
+    GPIOB->ODR &= ~ GPIO_ODR_2;  // Set PB2 low to enable SD card
 }
 
 void disable_sdcard(void) {
-    GPIOB->ODR |= GPIO_ODR_OD2;  // Set PB2 high to disable SD card
+    GPIOB->ODR |= GPIO_ODR_2;  // Set PB2 high to disable SD card
 }
 
 void init_sdcard_io(void) {
@@ -59,8 +59,8 @@ void init_sdcard_io(void) {
     init_spi1_slow();
 
     // Configure PB2 as an output (for SD card control)
-    GPIOB->MODER &= ~GPIO_MODER_MODE2_Msk;  // Clear MODER bits for PB2
-    GPIOB->MODER |= GPIO_MODER_MODE2_0;     // Set PB2 as output
+    GPIOB->MODER &= ~GPIO_MODER_MODER2_Msk;  // Clear MODER bits for PB2
+    GPIOB->MODER |= GPIO_MODER_MODER2_0;     // Set PB2 as output
 
     // Disable SD card (set PB2 high)
     disable_sdcard();
@@ -83,11 +83,11 @@ void sdcard_io_high_speed(void) {
 
 void init_lcd_spi(void) {
     // Enable the clock for GPIOB
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;   // Enable GPIOB clock
+    RCC->AHBENR |= RCC_AHBENR_GPIOBEN;   // Enable GPIOB clock
 
     // Configure PB8, PB11, PB14 as GPIO outputs
-    GPIOB->MODER &= ~(GPIO_MODER_MODE8_Msk | GPIO_MODER_MODE11_Msk | GPIO_MODER_MODE14_Msk);  // Clear MODER bits for PB8, PB11, PB14
-    GPIOB->MODER |= (GPIO_MODER_MODE8_0 | GPIO_MODER_MODE11_0 | GPIO_MODER_MODE14_0);        // Set PB8, PB11, PB14 as output
+    GPIOB->MODER &= ~(GPIO_MODER_MODER8_Msk | GPIO_MODER_MODER11_Msk | GPIO_MODER_MODER14_Msk);  // Clear MODER bits for PB8, PB11, PB14
+    GPIOB->MODER |= (GPIO_MODER_MODER8_0 | GPIO_MODER_MODER11_0 | GPIO_MODER_MODER14_0);        // Set PB8, PB11, PB14 as output
 
     // Initialize SPI1 with slow settings
     init_spi1_slow();
@@ -99,8 +99,8 @@ void init_lcd_spi(void) {
     SPI1->CR1 &= ~SPI_CR1_BR;  // Clear the BR bits
     SPI1->CR1 |= (SPI_CR1_BR_2 | SPI_CR1_BR_1);  // Set BR[2:0] = 011 for 24 MHz baud rate
 
-
-    SPI1->CR1 |= SPI_CR1_MSB_FIRST | SPI_CR1_DFF;  // 8-bit data size, MSB first
+    SPI1->CR1 &= ~(SPI_CR1_LSBFIRST_Pos); //MSB First
+    SPI1->CR2 |=  (7<< SPI_CR2_DS_Pos);  // 8-bit data size
 
     // Enable SPI1 for communication with LCD
     SPI1->CR1 |= SPI_CR1_SPE;  // Enable SPI1
@@ -279,17 +279,19 @@ int main() {
     // init_usart5();
     // enable_tty_interrupt();
 
-    setbuf(stdin,0); // These turn off buffering; more efficient, but makes it hard to explain why first 1023 characters not dispalyed
-    setbuf(stdout,0);
-    setbuf(stderr,0);
-    printf("Enter your name: "); // Types name but shouldn't echo the characters; USE CTRL-J to finish
-    char name[80];
-    fgets(name, 80, stdin);
-    printf("Your name is %s", name);
-    printf("Type any characters.\n"); // After, will type TWO instead of ONE
-    for(;;) {
-        char c = getchar();
-        putchar(c);
-    }
+    // setbuf(stdin,0); // These turn off buffering; more efficient, but makes it hard to explain why first 1023 characters not dispalyed
+    // setbuf(stdout,0);
+    // setbuf(stderr,0);
+    // printf("Enter your name: "); // Types name but shouldn't echo the characters; USE CTRL-J to finish
+    // char name[80];
+    // fgets(name, 80, stdin);
+    // printf("Your name is %s", name);
+    // printf("Type any characters.\n"); // After, will type TWO instead of ONE
+    // for(;;) {
+    //     char c = getchar();
+    //     putchar(c);
+    // }
+
+    
 }
 // #endif
