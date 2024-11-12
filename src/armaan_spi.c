@@ -10,7 +10,11 @@
 
 
 #include "stm32f0xx.h"
+#include "ff.h"			/* Obtains integer types */
+#include "diskio.h"		/* Declarations of disk functions */
 #include <stdint.h>
+
+#define SHELL 
 
 void internal_clock();
 
@@ -273,11 +277,11 @@ void init_lcd_spi(void) {
 //     }
 // }
 
-
+#ifdef SHELL 
 int main() {
     internal_clock();
     // init_usart5();
-    // enable_tty_interrupt();
+    enable_tty_interrupt();
 
     // setbuf(stdin,0); // These turn off buffering; more efficient, but makes it hard to explain why first 1023 characters not dispalyed
     // setbuf(stdout,0);
@@ -291,7 +295,8 @@ int main() {
     //     char c = getchar();
     //     putchar(c);
     // }
+    command_shell(); 
 
-    
+
 }
-// #endif
+ #endif
