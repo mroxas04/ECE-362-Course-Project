@@ -15,6 +15,101 @@
 void internal_clock();
 
 
+
+// void init_spi1_slow(void) {
+//     // Enable the clock for GPIOB and SPI1
+//     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;   // Enable GPIOB clock
+//     RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;    // Enable SPI1 clock
+
+//     // Configure GPIOB pins: PB3 (SCK), PB4 (MISO), PB5 (MOSI)
+//     GPIOB->MODER &= ~(GPIO-> | GPIO_MODER_MODE4_Msk | GPIO_MODER_MODE5_Msk);  // Clear MODER bits //FIX THIS 
+//     GPIOB->MODER |= (GPIO_MODER_MODE3_1 | GPIO_MODER_MODE4_1 | GPIO_MODER_MODE5_1);   // Set PB3, PB4, PB5 to alternate function mode
+
+//     // Configure GPIOB alternate functions for SPI1
+//     GPIOB->AFR[0] &= ~(GPIO_AFRL_AFSEL3_Msk | GPIO_AFRL_AFSEL4_Msk | GPIO_AFRL_AFSEL5_Msk);  // Clear AFR bits
+//     GPIOB->AFR[0] |= (5 << GPIO_AFRL_AFSEL3_Pos) | (5 << GPIO_AFRL_AFSEL4_Pos) | (5 << GPIO_AFRL_AFSEL5_Pos);  // Set AF5 (SPI1) for SCK, MISO, MOSI
+
+//     // Configure SPI1 settings
+//     SPI1->CR1 = 0;   // Reset all SPI1 settings
+
+//     // Set SPI1 in master mode, with 8-bit data size
+//     SPI1->CR1 |= SPI_CR1_MSTR | SPI_CR1_DFF;    // Master mode, 8-bit data size
+//     SPI1->CR1 |= SPI_CR1_SSM | SPI_CR1_SSI;     // Enable software slave management and internal slave select
+
+//     // Set the baud rate divisor to the maximum value for the slowest baud rate
+//     SPI1->CR1 |= SPI_CR1_BR_2 | SPI_CR1_BR_1 | SPI_CR1_BR_0;  // Baud rate divisor = 256
+
+//     // Configure the reception threshold to immediately release a received 8-bit value
+//     SPI1->CR2 |= SPI_CR2_FRXTH;  // Set the FIFO threshold to 8-bit
+
+//     // Enable SPI1
+//     SPI1->CR1 |= SPI_CR1_SPE;  // Enable SPI1
+// }
+
+// void enable_sdcard(void) {
+//     GPIOB->ODR &= ~GPIO_ODR_OD2;  // Set PB2 low to enable SD card
+// }
+
+// void disable_sdcard(void) {
+//     GPIOB->ODR |= GPIO_ODR_OD2;  // Set PB2 high to disable SD card
+// }
+
+// void init_sdcard_io(void) {
+//     // Initialize SPI1 with slow baud rate
+//     init_spi1_slow();
+
+//     // Configure PB2 as an output (for SD card control)
+//     GPIOB->MODER &= ~GPIO_MODER_MODE2_Msk;  // Clear MODER bits for PB2
+//     GPIOB->MODER |= GPIO_MODER_MODE2_0;     // Set PB2 as output
+
+//     // Disable SD card (set PB2 high)
+//     disable_sdcard();
+// }
+
+// void sdcard_io_high_speed(void) {
+//     // Disable SPI1
+//     SPI1->CR1 &= ~SPI_CR1_SPE;  // Disable SPI1
+
+//     // Set SPI1 baud rate to 12 MHz (assuming a system clock of 84 MHz)
+//     // Baud rate is determined by: BaudRate = f_PCLK / (2^(BR[2:0]))
+//     // For 12 MHz, BR[2:0] = 010 (divisor of 7 -> 84 MHz / 7 = 12 MHz)
+//     SPI1->CR1 &= ~SPI_CR1_BR;  // Clear the BR bits
+//     SPI1->CR1 |= (SPI_CR1_BR_2); // Set BR[2:0] = 010 for 12 MHz
+
+//     // Re-enable SPI1
+//     SPI1->CR1 |= SPI_CR1_SPE;  // Enable SPI1
+// }
+
+
+void init_lcd_spi(void) {
+    // Enable the clock for GPIOB
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;   // Enable GPIOB clock
+
+    // Configure PB8, PB11, PB14 as GPIO outputs
+    GPIOB->MODER &= ~(GPIO_MODER_MODE8_Msk | GPIO_MODER_MODE11_Msk | GPIO_MODER_MODE14_Msk);  // Clear MODER bits for PB8, PB11, PB14
+    GPIOB->MODER |= (GPIO_MODER_MODE8_0 | GPIO_MODER_MODE11_0 | GPIO_MODER_MODE14_0);        // Set PB8, PB11, PB14 as output
+
+    // Initialize SPI1 with slow settings
+    init_spi1_slow();
+
+    // Make SPI1 faster (set baud rate to 24 MHz)
+    sdcard_io_high_speed();  // This sets the baud rate to 12 MHz, but we will modify the baud rate for LCD
+
+    // BaudRate = f_PCLK / (2^BR) -> For 24 MHz, BR = 3 (84 MHz / 24 MHz = 3)
+    SPI1->CR1 &= ~SPI_CR1_BR;  // Clear the BR bits
+    SPI1->CR1 |= (SPI_CR1_BR_2 | SPI_CR1_BR_1);  // Set BR[2:0] = 011 for 24 MHz baud rate
+
+
+    SPI1->CR1 |= SPI_CR1_MSB_FIRST | SPI_CR1_DFF;  // 8-bit data size, MSB first
+
+    // Enable SPI1 for communication with LCD
+    SPI1->CR1 |= SPI_CR1_SPE;  // Enable SPI1
+}
+
+
+
+
+
 #define COMPLETED_STEP
 
 void init_usart5() {
