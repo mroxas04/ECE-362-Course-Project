@@ -288,13 +288,13 @@ void init_spi1_slow(void) {
     SPI1->CR1 &= ~SPI_CR1_SPE;  // Disable SPI1
 
     //BAUDRATE 
-    SPI1->CR1 &= ~SPI_CR1_BR;  // Clear the BR bits
-    SPI1->CR1 |= (SPI_CR1_BR_2 | SPI_CR1_BR_1 | SPI_CR1_BR_0);  //111, highest divisor 256 
+    // SPI1->CR1 &= ~SPI_CR1_BR;  // Clear the BR bits
+    SPI1->CR1 |= SPI_CR1_BR;  //111, highest divisor 256 
 
 
     // Set SPI1 in master mode, with 8-bit data size
     SPI1->CR1 |= SPI_CR1_MSTR;    // Master mode, 
-    SPI1->CR2 = (SPI_CR2_DS_3 | SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0);  //8-bit data size IS 0111
+    SPI1->CR2 |= (SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0);  //8-bit data size IS 0111
     SPI1->CR2 &= ~(SPI_CR2_DS_3);// << 8);
     SPI1->CR1 |= SPI_CR1_SSM | SPI_CR1_SSI;     // Enable software slave management and internal slave select
 
@@ -336,7 +336,7 @@ void sdcard_io_high_speed(void) {
     // Baud rate is determined by: BaudRate = f_PCLK / (2^(BR[2:0]))
     // For 12 MHz, BR[2:0] = 001 (divisor of 4 -> 48 MHz / 4 = 12 MHz)
     SPI1->CR1 &= ~SPI_CR1_BR;  // Clear the BR bits
-    SPI1->CR1 |= (SPI_CR1_BR_0); // Set BR[2:0] = 010 for 12 MHz
+    SPI1->CR1 |= (SPI_CR1_BR_0); // Set BR[2:0] = 001 for 12 MHz
 
     // Re-enable SPI1
     SPI1->CR1 |= SPI_CR1_SPE;  // Enable SPI1
