@@ -1,9 +1,9 @@
 /**
   ******************************************************************************
   * @file    main.c
-  * @author  Weili An, Niraj Menon
-  * @date    Feb 7, 2024
-  * @brief   ECE 362 Lab 7 student template
+  * @author  Matthew Roxas, Armaan Kanchan, Muhammad Zohaib Ali, Aditya Hebbani
+  * @date    Nov 12, 2024
+  * @brief   ECE 362 Course Project
   ******************************************************************************
 */
 
@@ -274,22 +274,32 @@ void init_spi1_slow(void) {
     RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;    // Enable SPI1 clock
 
     // Configure GPIOB pins: PB3 (SCK), PB4 (MISO), PB5 (MOSI)
-    GPIOB->MODER &= ~(GPIO_MODER_MODER0_Msk | GPIO_MODER_MODER4_Msk | GPIO_MODER_MODER5_Msk);  // Clear MODER bits //FIX THIS 
+    GPIOB->MODER &= ~(GPIO_MODER_MODER3_Msk | GPIO_MODER_MODER4_Msk | GPIO_MODER_MODER5_Msk);  // Clear MODER bits //FIX THIS 
     GPIOB->MODER |= (GPIO_MODER_MODER3_1 | GPIO_MODER_MODER4_1 | GPIO_MODER_MODER5_1);   // Set PB3, PB4, PB5 to alternate function mode
 
     // Configure GPIOB alternate functions for SPI1
     GPIOB->AFR[0] &= ~(GPIO_AFRL_AFSEL3_Msk | GPIO_AFRL_AFSEL4_Msk | GPIO_AFRL_AFSEL5_Msk);  // Clear AFR bits
-    GPIOB->AFR[0] |= (5 << GPIO_AFRL_AFSEL3_Pos) | (5 << GPIO_AFRL_AFSEL4_Pos) | (5 << GPIO_AFRL_AFSEL5_Pos);  // Set AF5 (SPI1) for SCK, MISO, MOSI
+    // GPIOB->AFR[0] |= (5 << GPIO_AFRL_AFSEL3_Pos) | (5 << GPIO_AFRL_AFSEL4_Pos) | (5 << GPIO_AFRL_AFSEL5_Pos);  // Set AF5 (SPI1) for SCK, MISO, MOSI //Why AF5? --Vinay
+    // GPIOB->AFR[0] |= (0 << GPIO_AFRL_AFSEL3_Pos) | (0 << GPIO_AFRL_AFSEL4_Pos) | (0 << GPIO_AFRL_AFSEL5_Pos);  // Set AF5 (SPI1) for SCK, MISO, MOSI
+
 
     // Configure SPI1 settings
-    SPI1->CR1 = 0;   // Reset all SPI1 settings
+    // SPI1->CR1 = 0;   // Reset all SPI1 settings          // Please do not do this. --Vinay
+    SPI1->CR1 &= ~SPI_CR1_SPE;  // Disable SPI1
+
+    //BAUDRATE 
+    SPI1->CR1 &= ~SPI_CR1_BR;  // Clear the BR bits
+    SPI1->CR1 |= (SPI_CR1_BR_2 | SPI_CR1_BR_1 | SPI_CR1_BR_0);  //111, highest divisor 256 
+
 
     // Set SPI1 in master mode, with 8-bit data size
-    SPI1->CR1 |= SPI_CR1_MSTR | (7<<8);    // Master mode, 8-bit data size
+    SPI1->CR1 |= SPI_CR1_MSTR;    // Master mode, 
+    SPI1->CR2 = (SPI_CR2_DS_3 | SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0);  //8-bit data size IS 0111
+    SPI1->CR2 &= ~(SPI_CR2_DS_3);// << 8);
     SPI1->CR1 |= SPI_CR1_SSM | SPI_CR1_SSI;     // Enable software slave management and internal slave select
 
     // Set the baud rate divisor to the maximum value for the slowest baud rate
-    SPI1->CR1 |= SPI_CR1_BR_2 | SPI_CR1_BR_1 | SPI_CR1_BR_0;  // Baud rate divisor = 256
+    // SPI1->CR1 |= SPI_CR1_BR_2 | SPI_CR1_BR_1 | SPI_CR1_BR_0;  // Baud rate divisor = 256
 
     // Configure the reception threshold to immediately release a received 8-bit value
     SPI1->CR2 |= SPI_CR2_FRXTH;  // Set the FIFO threshold to 8-bit
@@ -299,7 +309,7 @@ void init_spi1_slow(void) {
 }
 
 void enable_sdcard(void) {
-    GPIOB->ODR &= ~ GPIO_ODR_2;  // Set PB2 low to enable SD card
+    GPIOB->ODR &= ~GPIO_ODR_2;  // Set PB2 low to enable SD card
 }
 
 void disable_sdcard(void) {
@@ -324,9 +334,9 @@ void sdcard_io_high_speed(void) {
 
     // Set SPI1 baud rate to 12 MHz (assuming a system clock of 84 MHz)
     // Baud rate is determined by: BaudRate = f_PCLK / (2^(BR[2:0]))
-    // For 12 MHz, BR[2:0] = 010 (divisor of 7 -> 84 MHz / 7 = 12 MHz)
+    // For 12 MHz, BR[2:0] = 001 (divisor of 4 -> 48 MHz / 4 = 12 MHz)
     SPI1->CR1 &= ~SPI_CR1_BR;  // Clear the BR bits
-    SPI1->CR1 |= (SPI_CR1_BR_2); // Set BR[2:0] = 010 for 12 MHz
+    SPI1->CR1 |= (SPI_CR1_BR_0); // Set BR[2:0] = 010 for 12 MHz
 
     // Re-enable SPI1
     SPI1->CR1 |= SPI_CR1_SPE;  // Enable SPI1
@@ -347,15 +357,15 @@ void init_lcd_spi(void) {
     // Make SPI1 faster (set baud rate to 24 MHz)
     sdcard_io_high_speed();  // This sets the baud rate to 12 MHz, but we will modify the baud rate for LCD
 
-    // BaudRate = f_PCLK / (2^BR) -> For 24 MHz, BR = 3 (84 MHz / 24 MHz = 3)
-    SPI1->CR1 &= ~SPI_CR1_BR;  // Clear the BR bits
-    SPI1->CR1 |= (SPI_CR1_BR_2 | SPI_CR1_BR_1);  // Set BR[2:0] = 011 for 24 MHz baud rate
+    // // BaudRate = f_PCLK / (2^BR) -> For 24 MHz, BR = 3 (84 MHz / 24 MHz = 3)
+    // SPI1->CR1 &= ~SPI_CR1_BR;  // Clear the BR bits
+    // SPI1->CR1 |= (SPI_CR1_BR_2 | SPI_CR1_BR_1);  // Set BR[2:0] = 011 for 24 MHz baud rate
 
-    SPI1->CR1 &= ~(SPI_CR1_LSBFIRST_Pos); //MSB First
-    SPI1->CR2 |=  (7<< SPI_CR2_DS_Pos);  // 8-bit data size
+    // SPI1->CR1 &= ~(SPI_CR1_LSBFIRST_Pos); //MSB First
+    // SPI1->CR2 |=  (7<< SPI_CR2_DS_Pos);  // 8-bit data size
 
-    // Enable SPI1 for communication with LCD
-    SPI1->CR1 |= SPI_CR1_SPE;  // Enable SPI1
+    // // Enable SPI1 for communication with LCD
+    // SPI1->CR1 |= SPI_CR1_SPE;  // Enable SPI1
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
