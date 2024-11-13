@@ -16,6 +16,7 @@ const char* username = "kanchan";
 /*******************************************************************************/ 
 
 #include "stm32f0xx.h"
+#include "commands.h"
 #include <stdint.h>
 
 void internal_clock();
@@ -25,6 +26,7 @@ void internal_clock();
 // #define STEP2
 // #define STEP3
 #define STEP4
+
 
 void init_usart5() {
     // TODO
@@ -220,13 +222,17 @@ void enable_tty_interrupt(void) {
 // Works like line_buffer_getchar(), but does not check or clear ORE nor wait on new characters in USART
 char interrupt_getchar() {
     // TODO
-    while (!fifo_full(&input_fifo)) {
-        asm volatile ("wfi"); //wait for an interrupt 
-         
-    }
+      USART_TypeDef *u = USART5;
     // If we missed reading some characters, clear the overrun flag.
-   
-    // Return a character
+
+    // Wait for a newline to complete the buffer.
+    while(fifo_newline(&input_fifo) == 0) {
+        // while (!(u->ISR & USART_ISR_RXNE))
+        //     ;
+        // insert_echo_char(u->RDR);
+        asm volatile ("wfi"); // wait for an interrupt
+    }
+    // Return a character from the line buffer.
     char ch = fifo_remove(&input_fifo);
     return ch;
 }
@@ -351,24 +357,26 @@ void init_lcd_spi(void) {
     // Enable SPI1 for communication with LCD
     SPI1->CR1 |= SPI_CR1_SPE;  // Enable SPI1
 }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main() {
     internal_clock();
     init_usart5();
     enable_tty_interrupt();
-
+    
     setbuf(stdin,0); // These turn off buffering; more efficient, but makes it hard to explain why first 1023 characters not dispalyed
     setbuf(stdout,0);
     setbuf(stderr,0);
-    printf("Enter your name: "); // Types name but shouldn't echo the characters; USE CTRL-J to finish
-    char name[80];
-    fgets(name, 80, stdin);
-    printf("Your name is %s", name);
-    printf("Type any characters.\n"); // After, will type TWO instead of ONE
-    for(;;) {
-        char c = getchar();
-        putchar(c);
-    }
+    command_shell();
+    // printf("Enter your name: "); // Types name but shouldn't echo the characters; USE CTRL-J to finish
+    // char name[80];
+    // fgets(name, 80, stdin);
+    // printf("Your name is %s", name);
+    // printf("Type any characters.\n"); // After, will type TWO instead of ONE
+    // for(;;) {
+    //     char c = getchar();
+    //     putchar(c);
+    // }
 }
 #endif
