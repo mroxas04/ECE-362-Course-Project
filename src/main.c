@@ -482,6 +482,7 @@ void init_lcd_spi(void) {
 /* Question handler libraries */
 #include "cJSON.h"
 #include "questions.h"
+#include "lcd.h"
 
 int main() {
     internal_clock();
@@ -491,7 +492,7 @@ int main() {
     setbuf(stdin,0); // These turn off buffering; more efficient, but makes it hard to explain why first 1023 characters not dispalyed
     setbuf(stdout,0);
     setbuf(stderr,0);
-    command_shell();
+    //command_shell();
     // printf("Enter your name: "); // Types name but shouldn't echo the characters; USE CTRL-J to finish
     // char name[80];
     // fgets(name, 80, stdin);
@@ -503,6 +504,12 @@ int main() {
     // }
 
     // Test question handler
+
+    char *question = "hebbani is a clevery boy with a big nose"; //need to implement a checker to write another drawstring if the length of the string is too long i.e longer than 41 
+    LCD_Setup();
+    LCD_Clear(WHITE);
+    LCD_DrawString(0, 100, RED, BLACK, question, 16, 0);
+
     srand(time(NULL));
     Question questions[MAX_QUESTIONS];
     int question_count;
