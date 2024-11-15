@@ -863,7 +863,7 @@ const unsigned char asc2_1608[95][16]={
 // size is the height of the character (either 12 or 16)
 // When mode is set, the background will be transparent.
 //===========================================================================
-/* void _LCD_DrawChar(u16 x,u16 y,u16 fc, u16 bc, char num, u8 size, u8 mode)
+ void _LCD_DrawChar(u16 x,u16 y,u16 fc, u16 bc, char num, u8 size, u8 mode)
 {
     u8 temp;
     u8 pos,t;
@@ -901,8 +901,8 @@ const unsigned char asc2_1608[95][16]={
             }
         }
     }
-} */
-
+} 
+/*
 void LCD_WritePixel(u16 x, u16 y, u16 color) {
     // Set the drawing window to the single pixel location
     LCD_SetWindow(x, y, x, y);
@@ -962,7 +962,7 @@ void _LCD_DrawChar(u16 x, u16 y, u16 fc, u16 bc, char num, u8 size, u8 mode)
         }
     }
 }
-
+*/
 
 void LCD_DrawChar(u16 x,u16 y,u16 fc, u16 bc, char num, u8 size, u8 mode)
 {
