@@ -903,6 +903,16 @@ const unsigned char asc2_1608[95][16]={
     }
 } */
 
+void LCD_WritePixel(u16 x, u16 y, u16 color) {
+    // Set the drawing window to the single pixel location
+    LCD_SetWindow(x, y, x, y);
+    // Send the color data to fill this one-pixel window
+    LCD_WriteData16_Prepare();
+    LCD_WriteData16(color);
+    LCD_WriteData16_End();
+}
+
+
 void _LCD_DrawChar(u16 x, u16 y, u16 fc, u16 bc, char num, u8 size, u8 mode)
 {
     u8 temp;
