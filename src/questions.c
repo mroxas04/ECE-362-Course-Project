@@ -59,7 +59,7 @@ void printRandomQuestion(Question *questions, int question_count) {
         printf("No questions available.\n");
         return;
     }
-
+//use sprintf to format string for it to be fed into lcd draw string 
     int random_index = rand() % question_count;
     Question selected_question = questions[random_index];
 

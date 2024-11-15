@@ -497,7 +497,7 @@ void mul(int argc, char *argv[])
 }
 
 void send_question () {
-    char *question = "hebbani";
+    char *question = "hebbani is a clevery boy with a big nose"; //need to implement a checker to write another drawstring if the length of the string is too long i.e longer than 41 
     LCD_Setup();
     LCD_Clear(WHITE);
     LCD_DrawString(0, 100, RED, BLACK, question, 16, 0);
