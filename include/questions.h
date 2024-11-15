@@ -15,4 +15,4 @@ typedef struct {
 } Question;
 
 void loadQuestionsFromJSON(const char *filename, Question *questions, int *question_count);
-void printRandomQuestion(Question *questions, int question_count);
+char * printRandomQuestion(Question *questions, int question_count);

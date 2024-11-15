@@ -54,20 +54,43 @@ void loadQuestionsFromJSON(const char *filename, Question *questions, int *quest
     free(data);
 }
 
-void printRandomQuestion(Question *questions, int question_count) {
-    if (question_count == 0) {
-        printf("No questions available.\n");
-        return;
-    }
-//use sprintf to format string for it to be fed into lcd draw string 
+void formatQuestionToString(char *question, size_t size, Question selected_question) {
+    snprintf(question, size, 
+        "Question: %s\n",
+        "A: %s\n"
+        "B: %s\n"
+        "C: %s\n"
+        "D: %s\n",
+        selected_question.question,
+        selected_question.choices[0],
+        selected_question.choices[1],
+        selected_question.choices[2],
+        selected_question.choices[3]);
+}
+
+char *printRandomQuestion(Question *questions, int question_count) {
+    // if (question_count == 0) {
+    //     printf("No questions available.\n");
+    //     return NULL;
+    // }
+
+    //use sprintf to format string for it to be fed into lcd draw string 
     int random_index = rand() % question_count;
     Question selected_question = questions[random_index];
 
-    printf("Question: %s\n", selected_question.question);
-    printf("A: %s\n", selected_question.choices[0]);
-    printf("B: %s\n", selected_question.choices[1]);
-    printf("C: %s\n", selected_question.choices[2]);
-    printf("D: %s\n", selected_question.choices[3]);
+    // store everything in one string
+    char *question = malloc(sizeof(char) * 1000);
+    formatQuestionToString(question, sizeof(question), selected_question);
+
+    // return string
+    return question;
+
+    // Print question to terminal
+    // printf("Question: %s\n", selected_question.question);
+    // printf("A: %s\n", selected_question.choices[0]);
+    // printf("B: %s\n", selected_question.choices[1]);
+    // printf("C: %s\n", selected_question.choices[2]);
+    // printf("D: %s\n", selected_question.choices[3]);
 }
 
 // int main () {

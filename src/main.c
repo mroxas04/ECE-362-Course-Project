@@ -527,19 +527,22 @@ int main() {
     //     putchar(c);
     // }
 
-    // Test question handler
+    /* Test question handler */
+    // char *question = "hebbani is a clevery boy with a big nose and he loves to eat cake and dance but he is very annoying at times"; //need to implement a checker to write another drawstring if the length of the string is too long i.e longer than 41 
+    // char *question = "bro";
+    // LCD_Setup();
+    // LCD_Clear(WHITE);
+    // LCD_DrawString(0, 100, RED, BLACK, question, 16, 0);
+    // splitAndDisplayString(question); 
 
-    char *question = "hebbani is a clevery boy with a big nose and he loves to eat cake and dance but he is very annoying at times"; //need to implement a checker to write another drawstring if the length of the string is too long i.e longer than 41 
+    /* Display question */
+    srand(time(NULL));
+    Question questions[MAX_QUESTIONS];
+    int question_count;
+    loadQuestionsFromJSON("questions.json", questions, &question_count);
+    char *question = printRandomQuestion(questions, question_count);
     LCD_Setup();
     LCD_Clear(WHITE);
-    //LCD_DrawString(0, 100, RED, BLACK, question, 16, 0);
-
-    //  srand(time(NULL));
-    // Question questions[MAX_QUESTIONS];
-    // int question_count;
-
-    // loadQuestionsFromJSON("questions.json", questions, &question_count);
-    //printRandomQuestion(questions, question_count);
     splitAndDisplayString(question); 
 }
 #endif
