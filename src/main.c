@@ -484,6 +484,30 @@ void init_lcd_spi(void) {
 #include "questions.h"
 #include "lcd.h"
 
+#define MAX_STRING_LENGTH 40  // Max length per string to fit on the LCD
+
+void splitAndDisplayString(char *inputString) {
+    int length = strlen(inputString);
+    int numParts = (length + MAX_STRING_LENGTH - 1) / MAX_STRING_LENGTH; // Calculate the number of parts required
+
+    // Loop over and display each part of the string
+    for (int i = 0; i < numParts; i++) {
+        // Create a temporary string to hold the current part of the input string
+        char part[MAX_STRING_LENGTH + 1];  // +1 for null terminator
+        int startIndex = i * MAX_STRING_LENGTH;
+        
+        // Copy the appropriate part of the input string
+        strncpy(part, inputString + startIndex, MAX_STRING_LENGTH);
+        part[MAX_STRING_LENGTH] = '\0';  // Null terminate the string
+        
+        // Set up the y position for each part of the string to be displayed
+        int yPosition = 100 + (i * 20);  // Adjust the 20 for spacing between lines
+        
+        // Display the part of the string on the LCD
+        LCD_DrawString(0, yPosition, RED, BLACK, part, 16, 0);
+    }
+}
+
 int main() {
     internal_clock();
     init_usart5();
@@ -505,16 +529,17 @@ int main() {
 
     // Test question handler
 
-    char *question = "hebbani is a clevery boy with a big nose"; //need to implement a checker to write another drawstring if the length of the string is too long i.e longer than 41 
+    char *question = "hebbani is a clevery boy with a big nose and he loves to eat cake and dance but he is very annoying at times"; //need to implement a checker to write another drawstring if the length of the string is too long i.e longer than 41 
     LCD_Setup();
     LCD_Clear(WHITE);
-    LCD_DrawString(0, 100, RED, BLACK, question, 16, 0);
+    //LCD_DrawString(0, 100, RED, BLACK, question, 16, 0);
 
-    srand(time(NULL));
-    Question questions[MAX_QUESTIONS];
-    int question_count;
+    //  srand(time(NULL));
+    // Question questions[MAX_QUESTIONS];
+    // int question_count;
 
-    loadQuestionsFromJSON("questions.json", questions, &question_count);
-    printRandomQuestion(questions, question_count);
+    // loadQuestionsFromJSON("questions.json", questions, &question_count);
+    //printRandomQuestion(questions, question_count);
+    splitAndDisplayString(question); 
 }
 #endif
