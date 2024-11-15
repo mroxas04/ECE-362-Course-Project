@@ -500,7 +500,7 @@ void send_question () {
     char *question = "hebbani";
     LCD_Setup();
     LCD_Clear(100);
-    LCD_DrawString(0, 200, 100, 100, question, 10, 0);
+    LCD_DrawString(0, 200, 100, 100, question, 1000, 0);
 }
 
 struct commands_t cmds[] = {
