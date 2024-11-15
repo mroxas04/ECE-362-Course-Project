@@ -479,6 +479,9 @@ void init_lcd_spi(void) {
 // }
 // ////////////////gpio code done /////////////////////////////////////////////////////////////////////////////////////
 
+/* Question handler libraries */
+#include "cJSON.h"
+#include "questions.h"
 
 int main() {
     internal_clock();
@@ -499,6 +502,12 @@ int main() {
     //     putchar(c);
     // }
 
-    
+    // Test question handler
+    srand(time(NULL));
+    Question questions[MAX_QUESTIONS];
+    int question_count;
+
+    loadQuestionsFromJSON("questions.json", questions, &question_count);
+    printRandomQuestion(questions, question_count);
 }
 #endif

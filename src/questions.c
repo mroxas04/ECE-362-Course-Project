@@ -1,18 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <time.h>
-#include "cJSON.h"
-
-#define NUM_CHOICES 4
-#define MAX_QUESTIONS 10
-
-typedef struct {
-    char question[256];  
-    char choices[NUM_CHOICES][128]; 
-    int correct_answer;
-} Question;
+#include "questions.h"
 
 void loadQuestionsFromJSON(const char *filename, Question *questions, int *question_count) {
     FILE *file = fopen(filename, "r");
@@ -84,14 +70,14 @@ void printRandomQuestion(Question *questions, int question_count) {
     printf("D: %s\n", selected_question.choices[3]);
 }
 
-int main () {
-    srand(time(NULL));
-    Question questions[MAX_QUESTIONS];
-    int question_count;
+// int main () {
+//     srand(time(NULL));
+//     Question questions[MAX_QUESTIONS];
+//     int question_count;
 
-    loadQuestionsFromJSON("questions.json", questions, &question_count);
-    printRandomQuestion(questions, question_count);
+//     loadQuestionsFromJSON("questions.json", questions, &question_count);
+//     printRandomQuestion(questions, question_count);
 
-    return 0;
-}
+//     return 0;
+// }
 
