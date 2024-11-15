@@ -863,7 +863,7 @@ const unsigned char asc2_1608[95][16]={
 // size is the height of the character (either 12 or 16)
 // When mode is set, the background will be transparent.
 //===========================================================================
-void _LCD_DrawChar(u16 x,u16 y,u16 fc, u16 bc, char num, u8 size, u8 mode)
+/* void _LCD_DrawChar(u16 x,u16 y,u16 fc, u16 bc, char num, u8 size, u8 mode)
 {
     u8 temp;
     u8 pos,t;
@@ -901,7 +901,58 @@ void _LCD_DrawChar(u16 x,u16 y,u16 fc, u16 bc, char num, u8 size, u8 mode)
             }
         }
     }
+} */
+
+void _LCD_DrawChar(u16 x, u16 y, u16 fc, u16 bc, char num, u8 size, u8 mode)
+{
+    u8 temp;
+    u8 pos, t;
+    num = num - ' '; // Get ASCII offset
+
+    // Determine original font dimensions based on size input
+    u8 font_width = (size == 16) ? 8 : 6;
+    u8 font_height = (size == 16) ? 16 : 12;
+    
+    // Calculate scale factor for both width and height
+    u8 scale = size / font_height; // Scale factor based on desired size
+    
+    // Set drawing window to the scaled character size
+    LCD_SetWindow(x, y, x + font_width * scale - 1, y + font_height * scale - 1);
+
+    if (!mode) {
+        LCD_WriteData16_Prepare();
+        for (pos = 0; pos < font_height; pos++) {
+            temp = (size == 16) ? asc2_1608[(int)num][pos] : asc2_1206[(int)num][pos];
+            for (t = 0; t < font_width; t++) {
+                u16 color = (temp & 0x01) ? fc : bc;
+                
+                // Draw a block for each bit based on the scale factor
+                for (int i = 0; i < scale; i++) {
+                    for (int j = 0; j < scale; j++) {
+                        LCD_WritePixel(x + t * scale + j, y + pos * scale + i, color);
+                    }
+                }
+                temp >>= 1;
+            }
+        }
+        LCD_WriteData16_End();
+    } else {
+        for (pos = 0; pos < font_height; pos++) {
+            temp = (size == 16) ? asc2_1608[(int)num][pos] : asc2_1206[(int)num][pos];
+            for (t = 0; t < font_width; t++) {
+                if (temp & 0x01) {
+                    for (int i = 0; i < scale; i++) {
+                        for (int j = 0; j < scale; j++) {
+                            _LCD_DrawPoint(x + t * scale + j, y + pos * scale + i, fc);
+                        }
+                    }
+                }
+                temp >>= 1;
+            }
+        }
+    }
 }
+
 
 void LCD_DrawChar(u16 x,u16 y,u16 fc, u16 bc, char num, u8 size, u8 mode)
 {
