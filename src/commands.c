@@ -496,6 +496,13 @@ void mul(int argc, char *argv[])
   printf("The product is %d\n", prod);
 }
 
+void send_question () {
+    char *question = "hebbani";
+    LCD_Setup();
+    LCD_Clear(100);
+    LCD_DrawString(0, 200, 100, 100, question, 10, 0);
+}
+
 struct commands_t cmds[] = {
         { "append", append },
         { "cat", cat },
@@ -514,6 +521,7 @@ struct commands_t cmds[] = {
         { "drawline", drawline },
         { "drawrect", drawrect },
         { "drawfillrect", drawfillrect },
+        { "send_question", send_question }
 };
 
 // A weak definition that can be overridden by a better one.
@@ -597,3 +605,4 @@ void command_shell(void)
         parse_command(line);
     }
 }
+
