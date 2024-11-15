@@ -1,4 +1,4 @@
-#include "questions.h"
+/* #include "questions.h"
 
 void loadQuestionsFromJSON(const char *filename, Question *questions, int *question_count) {
     FILE *file = fopen(filename, "r");
@@ -81,3 +81,33 @@ void printRandomQuestion(Question *questions, int question_count) {
 //     return 0;
 // }
 
+ */
+
+#include "ff.h"             // FatFs library for SD card access
+#include "tft_display.h"     // Assume this header defines TFT display functions
+#include "cJSON.h"           // JSON parsing library
+#include "questions.h"       // Question structure and constants
+
+void loadQuestionsFromJSON(const char *filename) {
+    FIL file;               // FatFs file object
+    FRESULT fr;             // FatFs function result
+    UINT br;                // Bytes read
+    char buffer[1024];      // Buffer for reading JSON data
+
+    // Open file on SD card
+    fr = f_open(&file, filename, FA_READ);
+    if (fr != FR_OK) {
+        printf("Unable to open file\n");
+        return;
+    }
+
+    // Read file contents
+    fr = f_read(&file, buffer, sizeof(buffer) - 1, &br);
+    if (fr != FR_OK || br == 0) {
+        printf("Error reading file\n");
+        f_close(&file);
+        return;
+    }
+    buffer[br] = '\0';  // Null-terminate the buffer for JSON parsing
+    f_close(&file);
+}
