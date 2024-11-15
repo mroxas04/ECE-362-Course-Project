@@ -1,21 +1,50 @@
 #include "questions.h"
+#include "ff.h"
 
 void loadQuestionsFromJSON(const char *filename, Question *questions, int *question_count) {
-    FILE *file = fopen(filename, "r");
-    if (!file) {
-        perror("Unable to open file");
+    /* Test for reading for regular file system */
+    // FILE *file = fopen(filename, "r");
+    // if (!file) {
+    //     perror("Unable to open file");
+    //     return;
+    // }
+
+    // fseek(file, 0, SEEK_END);
+    // long length = ftell(file);
+    // fseek(file, 0, SEEK_SET);
+
+    // char *data = malloc(length + 1);
+    // fread(data, 1, length, file);
+    // fclose(file);
+    // data[length] = '\0';
+
+    /* Reading file using FATFS file system from SD card*/
+    FIL file;
+    FRESULT res;
+    UINT bytesRead;
+
+    // mount that shi
+    FATFS FatFs;
+    if (f_mount(&FatFs, "", 1 != FR_OK)) {
+        printf("Couldn't mount the sd card.");
         return;
     }
 
-    fseek(file, 0, SEEK_END);
-    long length = ftell(file);
-    fseek(file, 0, SEEK_SET);
+    // Open the file
+    res = f_open(&file, filename, FA_READ);
+    if (res != FR_OK) {
+        printf("Unable to open file.");
+        return;
+    }
 
-    char *data = malloc(length + 1);
-    fread(data, 1, length, file);
-    fclose(file);
-    data[length] = '\0';
+    // Get file size and read
+    DWORD fileSize = f_size(&file);
+    char *data = malloc(fileSize + 1);
+    res = f_read(&file, data, fileSize, &bytesRead);
+    data[fileSize] = '\0';
+    f_close(&file);
 
+    // Parse json
     cJSON *json = cJSON_Parse(data);
     if (!json) {
         printf("Error parsing JSON\n");

@@ -539,7 +539,7 @@ int main() {
     srand(time(NULL));
     Question questions[MAX_QUESTIONS];
     int question_count;
-    loadQuestionsFromJSON("questions.json", questions, &question_count);
+    loadQuestionsFromJSON("/questions.json", questions, &question_count);
     char *question = printRandomQuestion(questions, question_count);
     LCD_Setup();
     LCD_Clear(WHITE);
