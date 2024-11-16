@@ -118,7 +118,7 @@ void loadQuestionsFromJSON(const char *filename, Question *questions, int *quest
 
 void formatQuestionToString(char *question, size_t size, Question selected_question) {
     snprintf(question, size, 
-        "Question: %s\n",
+        "Question: %s\n"
         "A: %s\n"
         "B: %s\n"
         "C: %s\n"
@@ -128,6 +128,10 @@ void formatQuestionToString(char *question, size_t size, Question selected_quest
         selected_question.choices[1],
         selected_question.choices[2],
         selected_question.choices[3]);
+
+    // snprintf(question, size, 
+    //     "Question: %s\n",
+    //     selected_question.question);
 }
 
 char *printRandomQuestion(Question *questions, int question_count) {
@@ -141,8 +145,9 @@ char *printRandomQuestion(Question *questions, int question_count) {
     Question selected_question = questions[random_index];
 
     // store everything in one string
-    char *question = malloc(sizeof(char) * 1000);
-    formatQuestionToString(question, sizeof(question), selected_question);
+    char *question = malloc(sizeof(char) * 500);
+    // question = "Zohaib has no mustache";
+    formatQuestionToString(question, 500, selected_question);
 
     // return string
     return question;

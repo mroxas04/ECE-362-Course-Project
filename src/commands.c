@@ -503,6 +503,20 @@ void send_question () {
     LCD_DrawString(0, 100, RED, BLACK, question, 16, 0);
 }
 
+#include "questions.h"
+#include "ff.h"
+
+void armaan_gay () {
+    srand(time(NULL));
+    Question questions[MAX_QUESTIONS];
+    int question_count;
+    loadQuestionsFromJSON("qs_3.txt", questions, &question_count);
+    char *question = printRandomQuestion(questions, question_count);
+    LCD_Setup();
+    LCD_Clear(WHITE);
+    LCD_DrawString(0, 100, RED, BLACK, question, 16, 0);
+}
+
 struct commands_t cmds[] = {
         { "append", append },
         { "cat", cat },
@@ -521,7 +535,8 @@ struct commands_t cmds[] = {
         { "drawline", drawline },
         { "drawrect", drawrect },
         { "drawfillrect", drawfillrect },
-        { "send_question", send_question }
+        { "send_question", send_question }, 
+         { "armaan_gay", armaan_gay }
 };
 
 // A weak definition that can be overridden by a better one.
