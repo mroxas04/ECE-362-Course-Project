@@ -487,25 +487,65 @@ void init_lcd_spi(void) {
 
 #define MAX_STRING_LENGTH 40  // Max length per string to fit on the LCD
 
+// void splitAndDisplayString(char *inputString) {
+//     int length = strlen(inputString);
+//     int numParts = (length + MAX_STRING_LENGTH - 1) / MAX_STRING_LENGTH; // Calculate the number of parts required
+
+//     // Loop over and display each part of the string
+//     for (int i = 0; i < numParts; i++) {
+//         // Create a temporary string to hold the current part of the input string
+//         char part[MAX_STRING_LENGTH + 1];  // +1 for null terminator
+//         int startIndex = i * MAX_STRING_LENGTH;
+        
+//         // Copy the appropriate part of the input string
+//         strncpy(part, inputString + startIndex, MAX_STRING_LENGTH);
+//         part[MAX_STRING_LENGTH] = '\0';  // Null terminate the string
+        
+//         // Set up the y position for each part of the string to be displayed
+//         int yPosition = 100 + (i * 20);  // Adjust the 20 for spacing between lines
+        
+//         // Display the part of the string on the LCD
+//         LCD_DrawString(0, yPosition, RED, BLACK, part, 16, 0);
+//     }
+// }
+
 void splitAndDisplayString(char *inputString) {
     int length = strlen(inputString);
-    int numParts = (length + MAX_STRING_LENGTH - 1) / MAX_STRING_LENGTH; // Calculate the number of parts required
+    int numParts = 0;
+    int startIndex = 0;
 
-    // Loop over and display each part of the string
+    // Find the number of parts (lines) by counting newline characters
+    for (int i = 0; i < length; i++) {
+        if (inputString[i] == '\n') {
+            numParts++;
+        }
+    }
+    numParts++; // Account for the last line without a newline character
+
+    // Loop over each part and display it
     for (int i = 0; i < numParts; i++) {
-        // Create a temporary string to hold the current part of the input string
-        char part[MAX_STRING_LENGTH + 1];  // +1 for null terminator
-        int startIndex = i * MAX_STRING_LENGTH;
+        // Find the next newline or end of string
+        char *endOfLine = strchr(inputString + startIndex, '\n');
+        if (endOfLine == NULL) {
+            endOfLine = inputString + length; // Last line has no newline
+        }
         
-        // Copy the appropriate part of the input string
-        strncpy(part, inputString + startIndex, MAX_STRING_LENGTH);
-        part[MAX_STRING_LENGTH] = '\0';  // Null terminate the string
+        // Calculate the length of the current line
+        int lineLength = endOfLine - (inputString + startIndex);
+        
+        // Create a temporary string to hold the current part of the string
+        char part[MAX_STRING_LENGTH + 1];  // +1 for null terminator
+        strncpy(part, inputString + startIndex, lineLength);
+        part[lineLength] = '\0';  // Null terminate the string
         
         // Set up the y position for each part of the string to be displayed
         int yPosition = 100 + (i * 20);  // Adjust the 20 for spacing between lines
         
         // Display the part of the string on the LCD
         LCD_DrawString(0, yPosition, RED, BLACK, part, 16, 0);
+
+        // Move startIndex past the current line and newline character
+        startIndex += lineLength + 1; // +1 to skip the newline character
     }
 }
 
