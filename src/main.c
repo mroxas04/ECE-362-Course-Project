@@ -563,12 +563,12 @@ int main() {
     // }
     
     /* Display question */
-    // srand(time(NULL));
+    srand(time(NULL));
     Question questions[MAX_QUESTIONS];
     int question_count;
     loadQuestionsFromJSON("qs_3.txt", questions, &question_count);
     char *question = printRandomQuestion(questions, question_count);
-    LCD_Setup();
+    LCD_Setup(); 
     LCD_Clear(WHITE);
     splitAndDisplayString(question); 
 }
