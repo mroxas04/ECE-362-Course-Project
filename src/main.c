@@ -508,10 +508,77 @@ void splitAndDisplayString(char *inputString) {
     }
 }
 
+///UART CODE ////////////////////////////////////////////////////////////////////////////////////
+void init_usart1_tx() {
+    // Enable GPIOA and USART1 clocks
+    RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+    RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
+
+    // Configure PA9 as USART1_TX (Alternate Function)
+    GPIOA->MODER &= ~(GPIO_MODER_MODER9);        // Clear mode bits
+    GPIOA->MODER |= (GPIO_MODER_MODER9_1);       // Set to Alternate Function
+    GPIOA->AFR[1] |= (1 << (4 * (9 - 8)));       // Set AF1 for PA9
+
+    // Configure USART1
+    USART1->CR1 &= ~USART_CR1_UE;                // Disable USART for configuration
+    USART1->CR1 &= ~(USART_CR1_M1 | USART_CR1_M0); // 8 data bits
+    USART1->CR2 &= ~USART_CR2_STOP;              // 1 stop bit
+    USART1->CR1 &= ~USART_CR1_PCE;               // No parity
+    USART1->CR1 &= ~USART_CR1_OVER8;             // 16x oversampling
+
+    // Set baud rate (assuming 48 MHz clock)   maybe an 84
+    USART1->BRR = 48000000 / 115200;             // Set baud rate to 115200
+
+    // Enable transmitter
+    USART1->CR1 |= USART_CR1_TE;
+
+    // Enable USART1
+    USART1->CR1 |= USART_CR1_UE;
+
+    // Wait for transmitter readiness
+    while (!(USART1->ISR & USART_ISR_TEACK));
+}
+
+void usart1_send_char(char c) {
+    while (!(USART1->ISR & USART_ISR_TXE));  // Wait until TX buffer is empty
+    USART1->TDR = c;                         // Transmit the character
+}
+
+void usart1_send_string(const char *str) {
+    while (*str) {
+        usart1_send_char(*str++);
+    }
+}
+////UART CODE DONE ///////////////////////////////////////////////////////////////////////
+
+//BUZZER//
+void init_buzzer() {
+    // Enable GPIOA clock
+    RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+
+    // Configure PA5 as output
+    GPIOA->MODER &= ~(GPIO_MODER_MODER5);  // Clear mode bits for PA5
+    GPIOA->MODER |= GPIO_MODER_MODER5_0;  // Set PA5 as general-purpose output
+}
+
+void buzzer_on() {
+    GPIOA->ODR |= GPIO_ODR_5;  // Set PA5 high
+}
+
+void buzzer_off() {
+    GPIOA->ODR &= ~GPIO_ODR_5; // Set PA5 low
+}
+
+void delay(volatile uint32_t time) {
+    while (time--);
+}
+////
+
 int main() {
     internal_clock();
     init_usart5();
     enable_tty_interrupt();
+    init_usart1_tx(); //FOR USART
     
     setbuf(stdin,0); // These turn off buffering; more efficient, but makes it hard to explain why first 1023 characters not dispalyed
     setbuf(stdout,0);
@@ -544,5 +611,23 @@ int main() {
     LCD_Setup();
     LCD_Clear(WHITE);
     splitAndDisplayString(question); 
+    
+    ///usart for second stm
+     while (1) {
+        // usart1_send_string("Hello from STM TX!\r\n");
+        usart1_send_char('a');
+        for (volatile int i = 0; i < 1000000; i++);  // Delay loop
+    }
+    
+
+    //buzzer code 
+    init_buzzer();
+
+    while (1) {
+        buzzer_on();
+        delay(1000000);  // Delay for buzzer on
+        buzzer_off();
+        delay(1000000);  // Delay for buzzer off
+    }
 }
 #endif
