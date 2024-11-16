@@ -538,7 +538,7 @@ void splitAndDisplayString(char *inputString) {
         part[partLength] = '\0';  // Null terminate the string
 
         // Display the part on the LCD at the correct y position
-        int yPosition = 100 + (lineIndex * 20);  // Adjust for vertical spacing
+        int yPosition = 10 + (lineIndex * 20);  // Adjust for vertical spacing
         LCD_DrawString(0, yPosition, RED, BLACK, part, 16, 0);
 
         // Move the startIndex forward and increment the line index
@@ -613,11 +613,11 @@ int main() {
     loadQuestionsFromJSON("qs_3.txt", questions, &question_count);
     char *question = printRandomQuestion(questions, question_count);
     LCD_Setup(); 
-    LCD_Clear(WHITE);
+    LCD_Clear(BLACK);
     splitAndDisplayString(question); 
 
     /* Display scoreboard */
-    int *score = {100, 200, 500, 1000, 10000, 100000, 10000000};
+    // int *score = {100, 200, 500, 1000, 10000, 100000, 10000000};
     
 
     //create an exti from the keypad which causes the score to increase and the question to go to the next one 
