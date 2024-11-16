@@ -571,5 +571,17 @@ int main() {
     LCD_Setup(); 
     LCD_Clear(WHITE);
     splitAndDisplayString(question); 
+
+    /* Display scoreboard */
+    int *score = {100, 200, 500, 1000, 10000, 100000, 10000000};
+    
+
+    //create an exti from the keypad which causes the score to increase and the question to go to the next one 
+
+    //create a timer which displays the question for 10 seconds, then the options for 10 seconds and once it finishes, the game ends 
+
+    //optional: add leaderboard to the thing 
+
+    //add game ending and starting display and maybe if time option to take away ur winnings before each new question 
 }
 #endif
