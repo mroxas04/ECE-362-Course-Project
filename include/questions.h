@@ -9,7 +9,7 @@
 #define MAX_QUESTIONS 10
 
 typedef struct {
-    char question[256];  
+    char question[1000];  
     char choices[NUM_CHOICES][128]; 
     int correct_answer;
 } Question;

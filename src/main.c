@@ -515,19 +515,19 @@ int main() {
     enable_tty_interrupt();
     
     /* Open command shell */
-    setbuf(stdin,0); // These turn off buffering; more efficient, but makes it hard to explain why first 1023 characters not dispalyed
-    setbuf(stdout,0);
-    setbuf(stderr,0);
-    command_shell();
-    printf("Enter your name: "); // Types name but shouldn't echo the characters; USE CTRL-J to finish
-    char name[80];
-    fgets(name, 80, stdin);
-    printf("Your name is %s", name);
-    printf("Type any characters.\n"); // After, will type TWO instead of ONE
-    for(;;) {
-        char c = getchar();
-        putchar(c);
-    }
+    // setbuf(stdin,0); // These turn off buffering; more efficient, but makes it hard to explain why first 1023 characters not dispalyed
+    // setbuf(stdout,0);
+    // setbuf(stderr,0);
+    // command_shell();
+    // printf("Enter your name: "); // Types name but shouldn't echo the characters; USE CTRL-J to finish
+    // char name[80];
+    // fgets(name, 80, stdin);
+    // printf("Your name is %s", name);
+    // printf("Type any characters.\n"); // After, will type TWO instead of ONE
+    // for(;;) {
+    //     char c = getchar();
+    //     putchar(c);
+    // }
 
     /* Test question handler */
     // char *question = "hebbani is a clevery boy with a big nose and he loves to eat cake and dance but he is very annoying at times"; //need to implement a checker to write another drawstring if the length of the string is too long i.e longer than 41 
@@ -563,13 +563,13 @@ int main() {
     // }
     
     /* Display question */
-    // LCD_Setup();
-    // LCD_Clear(WHITE);
     // srand(time(NULL));
-    // Question questions[MAX_QUESTIONS];
-    // int question_count;
-    // loadQuestionsFromJSON("qs_3.txt", questions, &question_count);
-    // char *question = printRandomQuestion(questions, question_count);
-    // splitAndDisplayString(question); 
+    Question questions[MAX_QUESTIONS];
+    int question_count;
+    loadQuestionsFromJSON("qs_3.txt", questions, &question_count);
+    char *question = printRandomQuestion(questions, question_count);
+    LCD_Setup();
+    LCD_Clear(WHITE);
+    splitAndDisplayString(question); 
 }
 #endif

@@ -1,38 +1,6 @@
 #include "questions.h"
 #include "ff.h"
-
-void listDirectory(const char *path) {
-    DIR dir;           // Directory object
-    FILINFO fileInfo;  // File information structure
-
-    // Open the directory
-    FRESULT res = f_opendir(&dir, path);
-    if (res != FR_OK) {
-        printf("Failed to open directory: %s\n", path);
-        return;
-    }
-
-    printf("Contents of %s:\n", path);
-
-    // Read each item in the directory
-    while (1) {
-        res = f_readdir(&dir, &fileInfo);
-        if (res != FR_OK || fileInfo.fname[0] == 0) {
-            // Break on error or end of directory
-            break;
-        }
-
-        // Check if it's a directory
-        if (fileInfo.fattrib & AM_DIR) {
-            printf("[DIR] %s\n", fileInfo.fname);
-        } else {
-            printf("%s (Size: %lu bytes)\n", fileInfo.fname, fileInfo.fsize);
-        }
-    }
-
-    // Close the directory
-    f_closedir(&dir);
-}
+#include "stm32f0xx.h"
 
 void loadQuestionsFromJSON(const char *filename, Question *questions, int *question_count) {
     /* Test for reading for regular file system */
@@ -134,6 +102,10 @@ void formatQuestionToString(char *question, size_t size, Question selected_quest
     //     selected_question.question);
 }
 
+void seedRandomNumberGenerator() {
+    srand(SysTick->VAL);
+}
+
 char *printRandomQuestion(Question *questions, int question_count) {
     // if (question_count == 0) {
     //     printf("No questions available.\n");
@@ -141,13 +113,14 @@ char *printRandomQuestion(Question *questions, int question_count) {
     // }
 
     //use sprintf to format string for it to be fed into lcd draw string 
-    int random_index = rand() % question_count;
+    seedRandomNumberGenerator();
+
+    int random_index = (rand() % question_count);
     Question selected_question = questions[random_index];
 
     // store everything in one string
-    char *question = malloc(sizeof(char) * 500);
-    // question = "Zohaib has no mustache";
-    formatQuestionToString(question, 500, selected_question);
+    char *question = malloc(sizeof(char) * 1000);
+    formatQuestionToString(question, 1000, selected_question);
 
     // return string
     return question;

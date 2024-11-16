@@ -536,7 +536,7 @@ struct commands_t cmds[] = {
         { "drawrect", drawrect },
         { "drawfillrect", drawfillrect },
         { "send_question", send_question }, 
-         { "armaan_gay", armaan_gay }
+        { "armaan_gay", armaan_gay }
 };
 
 // A weak definition that can be overridden by a better one.
