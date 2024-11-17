@@ -581,31 +581,6 @@ int main() {
     // // LCD_DrawString(0, 100, RED, BLACK, question, 16, 0);
     // splitAndDisplayString(question); 
 
-    /* What's in the sd card? */
-    // listDirectory("/");
-
-    /* Print in command line */
-    // srand(time(NULL));
-    // Question questions[MAX_QUESTIONS];
-    // int question_count;
-    // // loadQuestionsFromJSON("qs.txt", questions, &question_count);
-    // char *question = printRandomQuestion(questions, question_count);
-
-    // setbuf(stdin,0); // These turn off buffering; more efficient, but makes it hard to explain why first 1023 characters not dispalyed
-    // setbuf(stdout,0);
-    // setbuf(stderr,0);
-    // command_shell();
-    // printf("Enter your name: "); // Types name but shouldn't echo the characters; USE CTRL-J to finish
-    // char name[80];
-    // fgets(name, 80, stdin);
-    // printf("Your name is %s", name);
-    // printf("Type any characters.\n"); // After, will type TWO instead of ONE
-    // printf("%s\n", question);
-    // for(;;) {
-    //     char c = getchar();
-    //     putchar(c);
-    // }
-    
     /* Display question */
     srand(time(NULL));
     Question questions[MAX_QUESTIONS];
@@ -619,7 +594,6 @@ int main() {
     /* Display scoreboard */
     // int *score = {100, 200, 500, 1000, 10000, 100000, 10000000};
     
-
     //create an exti from the keypad which causes the score to increase and the question to go to the next one 
 
     //create a timer which displays the question for 10 seconds, then the options for 10 seconds and once it finishes, the game ends 
