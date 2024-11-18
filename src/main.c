@@ -860,7 +860,16 @@ void SysTick_Handler() {
         if (current_col == 1) { // First question
             if (current_row_val & 0x8) {
                 timer_countdown = 10;
-                nextQuestion();
+                if(question_index < (question_count - 1))
+                {
+                    nextQuestion();
+                }
+                else
+                {
+                    char *question = "\n\n\n     Congratulations! You are now are a millionaire!\n            Press # to restart"; 
+                    splitAndDisplayString(question); 
+                    question_index = 0; 
+                }
             }
         }
     
