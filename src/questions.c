@@ -106,7 +106,7 @@ void seedRandomNumberGenerator() {
     srand(SysTick->VAL);
 }
 
-char *printRandomQuestion(Question *questions, int question_count) {
+char *printRandomQuestion(Question *questions, int question_count, int question_index) {
     // if (question_count == 0) {
     //     printf("No questions available.\n");
     //     return NULL;
@@ -116,7 +116,7 @@ char *printRandomQuestion(Question *questions, int question_count) {
     seedRandomNumberGenerator();
 
     int random_index = (rand() % question_count);
-    Question selected_question = questions[random_index];
+    Question selected_question = questions[0];
 
     // store everything in one string
     char *question = malloc(sizeof(char) * 1000);

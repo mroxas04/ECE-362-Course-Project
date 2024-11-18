@@ -658,25 +658,26 @@ void show_keys(void)
 /* Loading questions */
 
 // Load questions from file and display the first question
-void load_next_question() {
-    if (question_index >= question_count) {
-        // No more questions, go to the end screen
-        LCD_Setup();
-        LCD_Clear(BLACK);
-        splitAndDisplayString("You win!");
-        return;
-    }
+// void load_next_question() {
+//     if (question_index >= question_count) {
+//         // No more questions, go to the end screen
+//         LCD_Setup();
+//         LCD_Clear(BLACK);
+//         splitAndDisplayString("You win!");
+//         return;
+//     }
 
-    // Load the next question
-    char *question = printRandomQuestion(questions, question_count);
-    LCD_Setup(); 
-    LCD_Clear(BLACK);
-    splitAndDisplayString(question);
-    question_active = 1;  // Mark that a question is now active
-    countdown = 30;       // Reset the countdown
-    TIM2->CNT = 0;        // Reset the timer counter
-    TIM2->CR1 |= TIM_CR1_CEN;  // Start the timer
-}
+//     // Load the next question
+//     char *question = printRandomQuestion(questions, question_count);
+//     LCD_Setup(); 
+//     LCD_Clear(BLACK);
+//     splitAndDisplayString(question);
+//     question_active = 1;  // Mark that a question is now active
+//     countdown = 30;       // Reset the countdown
+//     // TIM2->CNT = 0;        // Reset the timer counter
+//     // TIM2->CR1 |= TIM_CR1_CEN;  // Start the timer
+//     // init_tim2();
+// }
 
 // Keypad event handling: reset timer on valid key press
 void handle_keypad_input(char key) {
@@ -699,56 +700,281 @@ void start_game() {
 
 /* Timer */
 
-void init_tim2(void) {
-    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
-    TIM2->PSC = 48000 - 1;
-    TIM2->ARR = 1000 - 1;
-    TIM2->DIER |= TIM_DIER_UIE;
-    TIM2->CR1 |= TIM_CR1_CEN;
-    NVIC->ISER[0] = 1<<TIM2_IRQn;
+// void init_tim2(void) {
+//     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+//     TIM2->PSC = 48000 - 1;
+//     TIM2->ARR = 1000 - 1;
+//     TIM2->DIER |= TIM_DIER_UIE;
+//     TIM2->CR1 |= TIM_CR1_CEN;
+//     NVIC->ISER[0] = 1<<TIM2_IRQn;
+// }
+
+// void TIM2_IRQHandler(void) {
+//     // Acknowledge interrupt
+// 	TIM2->SR &= ~TIM_SR_UIF;
+
+//     // Decrement counter
+// 	if (countdown > 0) countdown--;
+
+//     // Reset counter when it hits 0
+//     if (countdown == 0 && question_active) {
+//         question_active = 0;   // End the current question
+//         question_index++;      // Move to the next question
+//         LCD_Setup();
+//         LCD_Clear(BLACK);
+//         splitAndDisplayString("You lose.");
+//     }
+
+//     // Scan keys A, B, C, D for answer choices
+//     int rows = read_rows();
+// 	update_history(col, rows);
+// 	col = (col + 1) & 3;
+// 	drive_column(col);
+
+//     // Handle keypad input after a key press event is detected
+//     char key_event = get_key_event();
+//     if (key_event != 0) {
+//         handle_keypad_input(key_event & 0x7f);  // Extract the key without the event flag
+//     }
+
+//     // If countdown reaches zero and no key was pressed, display "You lose."
+//     if (countdown == 0 && !question_active) {
+//         LCD_Setup();
+//         LCD_Clear(BLACK);
+//         splitAndDisplayString("You lose.");
+//     }
+// }
+
+// void init_tim2(void) {
+//     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+//     TIM2->PSC = 72000 - 1;
+//     TIM2->ARR = 5 - 1;
+//     TIM2->DIER |= TIM_DIER_UIE;
+//     TIM2->CR1 |= TIM_CR1_CEN;
+//     NVIC->ISER[0] = 1<<TIM2_IRQn;
+// }
+
+// void TIM2_IRQHandler() {
+//     // Acknowledge interrupt
+//     // if (TIM2->SR & TIM_SR_UIF) 
+//     TIM2->SR &= ~TIM_SR_UIF;
+
+//     // New question every 30 seconds
+//     loadQuestionsFromJSON("qs_3.txt", questions, &question_count);
+//     char *question = printRandomQuestion(questions, question_count, question_index);
+//     LCD_Setup(); 
+//     LCD_Clear(BLACK);
+//     splitAndDisplayString(question); 
+//     question_index++;
+
+//     // Reset
+//     TIM2->CNT = 0;
+// }
+
+void delay_ms(uint32_t ms) {
+    for (uint32_t i = 0; i < ms * 6000; i++) {
+        __NOP();
+    }
+}
+volatile int timer_countdown = 10; // Timer countdown in seconds
+volatile int game_over = 0;        // Game over state flag
+volatile int key_pressed = 0;      // Flag to detect a key press
+
+void initc();
+void set_col(int col);
+void SysTick_Handler();
+void init_systick();
+
+extern void autotest();
+extern void internal_clock();
+extern void nano_wait(int);
+
+/**
+ * @brief Init GPIO port C
+ *        PC0-PC3 as input pins with the pull down resistor enabled
+ *        PC4-PC9 as output pins
+ * 
+ */
+void initc() {
+  RCC->AHBENR |= RCC_AHBENR_GPIOCEN; //enabling the port 
+  GPIOC->MODER &= ~0x000000FF; //setting input 
+  GPIOC->MODER |= 0x00055500; //output 
+  GPIOC->PUPDR |= 0x000000AA; //pull down
+
 }
 
-void TIM2_IRQHandler(void) {
-    // Acknowledge interrupt
-	TIM2->SR &= ~TIM_SR_UIF;
+/**
+ * @brief Enable the SysTick interrupt to occur every 1/16 seconds.
+ * 
+ */
+void init_systick() {
+  SysTick->LOAD = 375000-1;
+  SysTick->VAL = 0;
+    SysTick->CTRL &= ~0x4;
 
-    // Decrement counter
-	if (countdown > 0) countdown--;
+  SysTick->CTRL |= 0x3;
+}
 
-    // Reset counter when it hits 0
-    if (countdown == 0 && question_active) {
-        question_active = 0;   // End the current question
-        question_index++;      // Move to the next question
-        LCD_Setup();
-        LCD_Clear(BLACK);
-        splitAndDisplayString("You lose.");
+volatile int current_col = 1;
+
+/**
+ * @brief The ISR for the SysTick interrupt.
+ * 
+//  */
+// void SysTick_Handler() {
+//    //1. Read the row pins using GPIOC->IDR
+//     //    You can check the pins used for rows 
+//     //    of keypad in lab 1 manual
+//     // 2. If the var `current_col` corresponds to
+//     //    the row value, toggle one of the leds connected 
+//     //    to PB8-11.
+//     //    Basically the same we have done in lab 1
+//     // 3. Increment the `current_col` and wrap around
+//     //    to 1 if `current_col` > 4. So that next time
+//     //    we scan the next column
+//     // 4. Set the changed column pin designated by `current_col`
+//     //    to 1 and rest of the column pins to 0 to energized that
+//     //    particular column for next read of keypad.
+
+//    int current_row_val = GPIOC->IDR; //determines row number that is on 
+
+//    if(current_col == 4)
+//    {
+//     if(current_row_val & 0x1){   // if key D 
+//     char* question3 = "free imran khan"; 
+//         LCD_Setup(); 
+//         LCD_Clear(BLACK);
+//         splitAndDisplayString(question3); 
+//    }
+
+//    if(current_row_val & 0x2){   // if key C
+//     char* question3 = "free massage 6507858464"; 
+//         LCD_Setup(); 
+//         LCD_Clear(BLACK);
+//         splitAndDisplayString(question3); 
+//    }
+
+//    if(current_row_val & 0x4){   // if key B
+//     char* question3 = "free patti "; 
+//         LCD_Setup(); 
+//         LCD_Clear(BLACK);
+//         splitAndDisplayString(question3); 
+//    }
+
+//    if(current_row_val & 0x8){   // if key A
+//     char* question3 = "free badhri "; 
+//         LCD_Setup(); 
+//         LCD_Clear(BLACK);
+//         splitAndDisplayString(question3); 
+//    }
+
+//    }
+//     current_col++;
+    
+//    if(current_col > 4){
+//     current_col = 1;
+//    }
+//    set_col(current_col);
+// }
+void SysTick_Handler() {
+    static int systick_ticks = 0;  // Counts SysTick ticks (1/16 second per tick)
+
+    systick_ticks++;
+    if (systick_ticks >= 16) {  // 16 ticks = 1 second
+        systick_ticks = 0;
+
+        if (timer_countdown > 0) {  // Decrement the timer if not zero
+            timer_countdown--;
+        } else if (!game_over) {  // Transition to "Game Over" if timer reaches zero
+            game_over = 1;  // Set the game over flag
+            char *game_over_msg = "Game Over";
+            LCD_Setup();
+            LCD_Clear(BLACK);
+            splitAndDisplayString(game_over_msg);
+        }
     }
 
-    // Scan keys A, B, C, D for answer choices
-    int rows = read_rows();
-	update_history(col, rows);
-	col = (col + 1) & 3;
-	drive_column(col);
+    // Handle keypad scanning
+    int current_row_val = GPIOC->IDR;  // Read the row pins
+    if (current_row_val) {  // If a key is pressed
 
-    // Handle keypad input after a key press event is detected
-    char key_event = get_key_event();
-    if (key_event != 0) {
-        handle_keypad_input(key_event & 0x7f);  // Extract the key without the event flag
-    }
 
-    // If countdown reaches zero and no key was pressed, display "You lose."
-    if (countdown == 0 && !question_active) {
-        LCD_Setup();
+if(current_col == 3) //RESET BUTTON 
+{
+    if(current_row_val&0x1)
+    {
+        key_pressed = 1;      // Set the key pressed flag
+        timer_countdown = 10; // Reset the timer to 20 seconds (but it continues counting down)
+        game_over = 0;        // Clear the game over flag
+         char *question = "Press a key to restart"; 
+        LCD_Setup(); 
         LCD_Clear(BLACK);
-        splitAndDisplayString("You lose.");
+        splitAndDisplayString(question); 
     }
 }
+
+        // Handle specific key presses (row 4 example)
+        if (current_col == 4) {
+            if (current_row_val & 0x1) {  // Key D
+                char *question = "Free Imran Khan";
+                LCD_Setup();
+                LCD_Clear(BLACK);
+                splitAndDisplayString(question);
+            } else if (current_row_val & 0x2) {  // Key C
+                char *question = "Free massage 6507858464";
+                LCD_Setup();
+                LCD_Clear(BLACK);
+                splitAndDisplayString(question);
+            } else if (current_row_val & 0x4) {  // Key B
+                char *question = "Free Patti";
+                LCD_Setup();
+                LCD_Clear(BLACK);
+                splitAndDisplayString(question);
+            } else if (current_row_val & 0x8) {  // Key A
+                char *question = "Free Badhri";
+                LCD_Setup();
+                LCD_Clear(BLACK);
+                splitAndDisplayString(question);
+            }
+        }
+    }
+
+    // Increment the column for scanning
+    current_col++;
+    if (current_col > 4) {
+        current_col = 1;
+    }
+    set_col(current_col);
+}
+
+
+
+/**
+ * @brief For the keypad pins, 
+ *        Set the specified column level to logic "high".
+ *        Set the other three three columns to logic "low".
+ * 
+ * @param col 
+ */
+void set_col(int col) {
+// Set PC4-7 (i.e. all columns) output to be 0
+    // Set the column `col` output to be 1
+    //  if col = 1, PC7 will be set to 1 as 
+    //  it is connected to column 1 of the keypad 
+    //  Likewise, if col = 4, PC4 will be set to 1
+
+    GPIOC->ODR &= ~0xFF00; //set them as 0 
+    GPIOC->ODR = (1<<(8-col));
+
+}
+
 
 int main() {
     internal_clock();
-    init_usart5();
+    //init_usart5();
     enable_tty_interrupt();
-    
+    initc();
+    init_systick();
     /* Open command shell */
     // setbuf(stdin,0); // These turn off buffering; more efficient, but makes it hard to explain why first 1023 characters not dispalyed
     // setbuf(stdout,0);
@@ -782,11 +1008,49 @@ int main() {
     // LCD_Clear(BLACK);
     // splitAndDisplayString(question); 
 
+    /* Go to the next question when timer reaches 0 */
+    loadQuestionsFromJSON("qs_3.txt", questions, &question_count);
+
+    //while (question_index < question_count) {
+        //char *question = printRandomQuestion(questions, question_count, 0);
+
+        //char *question = "hello world"; 
+
+        char *question = "Press a key to begin"; 
+        LCD_Setup(); 
+        LCD_Clear(BLACK);
+        splitAndDisplayString(question); 
+        //delay_ms(2000);
+        //LCD_Clear(BLACK);
+
+        //delay_ms(1000); 
+        // splitAndDisplayString(question2); 
+
+        while(1)
+        {
+
+        }
+
+
+        // delay_ms(1000); 
+        
+        // *question = printRandomQuestion(questions, question_count, 1);
+        // LCD_Setup(); 
+        // LCD_Clear(BLACK);
+        // splitAndDisplayString(question); 
+
+
+
+
+        //delay_ms(100);
+    //     question_index++;
+    // }
+
     /* Use timer to iterate through questions and check keypad */
-    LCD_Setup(); 
-    LCD_Clear(BLACK);
-    start_game();
-    init_tim2();
+    // LCD_Setup(); 
+    // LCD_Clear(BLACK);
+    // start_game();
+    // init_tim2();
 
     /* Display scoreboard */
     // int *score = {100, 200, 500, 1000, 10000, 100000, 10000000};
