@@ -677,7 +677,7 @@ void delay_ms(uint32_t ms) {
 
 
 
-volatile int timer_countdown = 10; // Timer countdown in seconds
+volatile int timer_countdown = 100; // Timer countdown in seconds
 volatile int game_over = 0;        // Game over state flag
 volatile int key_pressed = 0;      // Flag to detect a key press
 
@@ -812,7 +812,7 @@ void nextQuestion() {
     LCD_Setup();
     LCD_Clear(BLACK);
     splitAndDisplayString(question);
-    // timer_countdown = 20;
+    timer_countdown = 10;
 }
 
 void checkAnswer(char answer) {
@@ -820,7 +820,6 @@ void checkAnswer(char answer) {
         wrongAnswer();
     }
     else {
-        timer_countdown = 10;
         correctAnswer();
     }
 }
@@ -848,7 +847,7 @@ void SysTick_Handler() {
             if(current_row_val & 0x1)
             {
                 key_pressed = 1;      // Set the key pressed flag
-                timer_countdown = 10; // Reset the timer to 20 seconds (but it continues counting down)
+                // timer_countdown = 10; // Reset the timer to 20 seconds (but it continues counting down)
                 game_over = 0;        // Clear the game over flag
                 // char *question = "Press a key to restart"; 
                 char *question = "Press 1 to start";
@@ -860,6 +859,7 @@ void SysTick_Handler() {
 
         if (current_col == 1) { // First question
             if (current_row_val & 0x8) {
+                timer_countdown = 10;
                 nextQuestion();
             }
         }
