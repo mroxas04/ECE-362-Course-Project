@@ -71,10 +71,11 @@ void loadQuestionsFromJSON(const char *filename, Question *questions, int *quest
             strncpy(questions[*question_count].choices[1], optB->valuestring, sizeof(questions[*question_count].choices[1]));
             strncpy(questions[*question_count].choices[2], optC->valuestring, sizeof(questions[*question_count].choices[2]));
             strncpy(questions[*question_count].choices[3], optD->valuestring, sizeof(questions[*question_count].choices[3]));
+            strncpy(questions[*question_count].correct_answer, answer->valuestring, sizeof(questions[*question_count].correct_answer));
 
-            // Map answer letter to index
-            char answer_char = answer->valuestring[0];
-            questions[*question_count].correct_answer = answer_char - 'A';
+            // // Map answer letter to index
+            // char answer_char = answer->valuestring[0];
+            // questions[*question_count].correct_answer = answer_char - 'A';
 
             (*question_count)++;
         }
@@ -96,15 +97,11 @@ void formatQuestionToString(char *question, size_t size, Question selected_quest
         selected_question.choices[1],
         selected_question.choices[2],
         selected_question.choices[3]);
-
-    // snprintf(question, size, 
-    //     "Question: %s\n",
-    //     selected_question.question);
 }
 
-void seedRandomNumberGenerator() {
-    srand(SysTick->VAL);
-}
+// void seedRandomNumberGenerator() {
+//     srand(SysTick->VAL);
+// }
 
 char *printRandomQuestion(Question *questions, int question_count, int question_index) {
     // if (question_count == 0) {
@@ -113,10 +110,10 @@ char *printRandomQuestion(Question *questions, int question_count, int question_
     // }
 
     //use sprintf to format string for it to be fed into lcd draw string 
-    seedRandomNumberGenerator();
+    // seedRandomNumberGenerator();
 
-    int random_index = (rand() % question_count);
-    Question selected_question = questions[0];
+    // int random_index = (rand() % question_count);
+    Question selected_question = questions[question_index];
 
     // store everything in one string
     char *question = malloc(sizeof(char) * 1000);

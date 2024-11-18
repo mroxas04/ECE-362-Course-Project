@@ -115,4 +115,118 @@
 // }
 
 
+/* Timer */
 
+// void init_tim2(void) {
+//     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+//     TIM2->PSC = 48000 - 1;
+//     TIM2->ARR = 1000 - 1;
+//     TIM2->DIER |= TIM_DIER_UIE;
+//     TIM2->CR1 |= TIM_CR1_CEN;
+//     NVIC->ISER[0] = 1<<TIM2_IRQn;
+// }
+
+// void TIM2_IRQHandler(void) {
+//     // Acknowledge interrupt
+// 	TIM2->SR &= ~TIM_SR_UIF;
+
+//     // Decrement counter
+// 	if (countdown > 0) countdown--;
+
+//     // Reset counter when it hits 0
+//     if (countdown == 0 && question_active) {
+//         question_active = 0;   // End the current question
+//         question_index++;      // Move to the next question
+//         LCD_Setup();
+//         LCD_Clear(BLACK);
+//         splitAndDisplayString("You lose.");
+//     }
+
+//     // Scan keys A, B, C, D for answer choices
+//     int rows = read_rows();
+// 	update_history(col, rows);
+// 	col = (col + 1) & 3;
+// 	drive_column(col);
+
+//     // Handle keypad input after a key press event is detected
+//     char key_event = get_key_event();
+//     if (key_event != 0) {
+//         handle_keypad_input(key_event & 0x7f);  // Extract the key without the event flag
+//     }
+
+//     // If countdown reaches zero and no key was pressed, display "You lose."
+//     if (countdown == 0 && !question_active) {
+//         LCD_Setup();
+//         LCD_Clear(BLACK);
+//         splitAndDisplayString("You lose.");
+//     }
+// }
+
+// void init_tim2(void) {
+//     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+//     TIM2->PSC = 72000 - 1;
+//     TIM2->ARR = 5 - 1;
+//     TIM2->DIER |= TIM_DIER_UIE;
+//     TIM2->CR1 |= TIM_CR1_CEN;
+//     NVIC->ISER[0] = 1<<TIM2_IRQn;
+// }
+
+// void TIM2_IRQHandler() {
+//     // Acknowledge interrupt
+//     // if (TIM2->SR & TIM_SR_UIF) 
+//     TIM2->SR &= ~TIM_SR_UIF;
+
+//     // New question every 30 seconds
+//     loadQuestionsFromJSON("qs_3.txt", questions, &question_count);
+//     char *question = printRandomQuestion(questions, question_count, question_index);
+//     LCD_Setup(); 
+//     LCD_Clear(BLACK);
+//     splitAndDisplayString(question); 
+//     question_index++;
+
+//     // Reset
+//     TIM2->CNT = 0;
+// }
+
+
+/* Loading questions */
+
+// Load questions from file and display the first question
+// void load_next_question() {
+//     if (question_index >= question_count) {
+//         // No more questions, go to the end screen
+//         LCD_Setup();
+//         LCD_Clear(BLACK);
+//         splitAndDisplayString("You win!");
+//         return;
+//     }
+
+//     // Load the next question
+//     char *question = printRandomQuestion(questions, question_count);
+//     LCD_Setup(); 
+//     LCD_Clear(BLACK);
+//     splitAndDisplayString(question);
+//     question_active = 1;  // Mark that a question is now active
+//     countdown = 30;       // Reset the countdown
+//     // TIM2->CNT = 0;        // Reset the timer counter
+//     // TIM2->CR1 |= TIM_CR1_CEN;  // Start the timer
+//     // init_tim2();
+// }
+
+// // Keypad event handling: reset timer on valid key press
+// void handle_keypad_input(char key) {
+//     // If a valid key (A, B, C, or D) is pressed, reset the timer and move to the next question
+//     if (key == 'A' || key == 'B' || key == 'C' || key == 'D') {
+//         countdown = 30;          // Reset the timer
+//         TIM2->CNT = 0;           // Reset the timer counter
+//         TIM2->CR1 |= TIM_CR1_CEN;  // Restart the timer
+//         question_active = 0;      // Move on to the next question
+//         question_index++;        // Increment to the next question
+//         load_next_question();    // Load and display the next question
+//     }
+// }
+
+// void start_game() {
+//     loadQuestionsFromJSON("qs_3.txt", questions, &question_count);
+//     load_next_question();  // Display the first question
+// }

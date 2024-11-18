@@ -572,7 +572,7 @@ void splitAndDisplayString(char *inputString) {
 
 volatile uint32_t countdown = 30;     // 30-second countdown
 volatile int question_active = 0;      // Whether a question is active
-int question_index = 0;                // Index of the current question
+int question_index = -1;                // Index of the current question
 Question questions[MAX_QUESTIONS];      // Array of questions
 int question_count = 0;                // Total number of questions
 
@@ -655,127 +655,28 @@ void show_keys(void)
 }
 
 
-/* Loading questions */
-
-// Load questions from file and display the first question
-// void load_next_question() {
-//     if (question_index >= question_count) {
-//         // No more questions, go to the end screen
-//         LCD_Setup();
-//         LCD_Clear(BLACK);
-//         splitAndDisplayString("You win!");
-//         return;
-//     }
-
-//     // Load the next question
-//     char *question = printRandomQuestion(questions, question_count);
-//     LCD_Setup(); 
-//     LCD_Clear(BLACK);
-//     splitAndDisplayString(question);
-//     question_active = 1;  // Mark that a question is now active
-//     countdown = 30;       // Reset the countdown
-//     // TIM2->CNT = 0;        // Reset the timer counter
-//     // TIM2->CR1 |= TIM_CR1_CEN;  // Start the timer
-//     // init_tim2();
-// }
-
-// Keypad event handling: reset timer on valid key press
-void handle_keypad_input(char key) {
-    // If a valid key (A, B, C, or D) is pressed, reset the timer and move to the next question
-    if (key == 'A' || key == 'B' || key == 'C' || key == 'D') {
-        countdown = 30;          // Reset the timer
-        TIM2->CNT = 0;           // Reset the timer counter
-        TIM2->CR1 |= TIM_CR1_CEN;  // Restart the timer
-        question_active = 0;      // Move on to the next question
-        question_index++;        // Increment to the next question
-        load_next_question();    // Load and display the next question
-    }
-}
-
-void start_game() {
-    loadQuestionsFromJSON("qs_3.txt", questions, &question_count);
-    load_next_question();  // Display the first question
-}
-
-
-/* Timer */
-
-// void init_tim2(void) {
-//     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
-//     TIM2->PSC = 48000 - 1;
-//     TIM2->ARR = 1000 - 1;
-//     TIM2->DIER |= TIM_DIER_UIE;
-//     TIM2->CR1 |= TIM_CR1_CEN;
-//     NVIC->ISER[0] = 1<<TIM2_IRQn;
-// }
-
-// void TIM2_IRQHandler(void) {
-//     // Acknowledge interrupt
-// 	TIM2->SR &= ~TIM_SR_UIF;
-
-//     // Decrement counter
-// 	if (countdown > 0) countdown--;
-
-//     // Reset counter when it hits 0
-//     if (countdown == 0 && question_active) {
-//         question_active = 0;   // End the current question
-//         question_index++;      // Move to the next question
-//         LCD_Setup();
-//         LCD_Clear(BLACK);
-//         splitAndDisplayString("You lose.");
-//     }
-
-//     // Scan keys A, B, C, D for answer choices
-//     int rows = read_rows();
-// 	update_history(col, rows);
-// 	col = (col + 1) & 3;
-// 	drive_column(col);
-
-//     // Handle keypad input after a key press event is detected
-//     char key_event = get_key_event();
-//     if (key_event != 0) {
-//         handle_keypad_input(key_event & 0x7f);  // Extract the key without the event flag
-//     }
-
-//     // If countdown reaches zero and no key was pressed, display "You lose."
-//     if (countdown == 0 && !question_active) {
-//         LCD_Setup();
-//         LCD_Clear(BLACK);
-//         splitAndDisplayString("You lose.");
-//     }
-// }
-
-// void init_tim2(void) {
-//     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
-//     TIM2->PSC = 72000 - 1;
-//     TIM2->ARR = 5 - 1;
-//     TIM2->DIER |= TIM_DIER_UIE;
-//     TIM2->CR1 |= TIM_CR1_CEN;
-//     NVIC->ISER[0] = 1<<TIM2_IRQn;
-// }
-
-// void TIM2_IRQHandler() {
-//     // Acknowledge interrupt
-//     // if (TIM2->SR & TIM_SR_UIF) 
-//     TIM2->SR &= ~TIM_SR_UIF;
-
-//     // New question every 30 seconds
-//     loadQuestionsFromJSON("qs_3.txt", questions, &question_count);
-//     char *question = printRandomQuestion(questions, question_count, question_index);
-//     LCD_Setup(); 
-//     LCD_Clear(BLACK);
-//     splitAndDisplayString(question); 
-//     question_index++;
-
-//     // Reset
-//     TIM2->CNT = 0;
-// }
-
+/* Software timer */
 void delay_ms(uint32_t ms) {
     for (uint32_t i = 0; i < ms * 6000; i++) {
         __NOP();
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 volatile int timer_countdown = 10; // Timer countdown in seconds
 volatile int game_over = 0;        // Game over state flag
 volatile int key_pressed = 0;      // Flag to detect a key press
@@ -876,6 +777,52 @@ volatile int current_col = 1;
 //    }
 //    set_col(current_col);
 // }
+
+void outOfTime() {
+    question_index = -1;
+    game_over = 1;  // Set the game over flag
+    char *game_over_msg = "Out of time! Game over.";
+    LCD_Setup();
+    LCD_Clear(BLACK);
+    splitAndDisplayString(game_over_msg);
+}
+
+void wrongAnswer() {
+    game_over = 1;
+    char wrong[50];
+    snprintf(wrong, sizeof(wrong), "Game over! The right answer was %s. ", questions[question_index].correct_answer);
+    question_index = -1;
+    LCD_Setup();
+    LCD_Clear(BLACK);
+    splitAndDisplayString(wrong);
+    // hold timer
+}
+
+void correctAnswer() {
+    char *right = "Correct! Press 1 for next question.";
+    LCD_Setup();
+    LCD_Clear(BLACK);
+    splitAndDisplayString(right);
+    // hold timer
+}
+
+void nextQuestion() {
+    char *question = printRandomQuestion(questions, question_count, ++question_index);
+    LCD_Setup();
+    LCD_Clear(BLACK);
+    splitAndDisplayString(question);
+    timer_countdown = 20;
+}
+
+void checkAnswer(char answer) {
+    if (answer != (char)questions[question_index].correct_answer[0]) {
+        wrongAnswer();
+    }
+    else {
+        correctAnswer();
+    }
+}
+
 void SysTick_Handler() {
     static int systick_ticks = 0;  // Counts SysTick ticks (1/16 second per tick)
 
@@ -886,11 +833,7 @@ void SysTick_Handler() {
         if (timer_countdown > 0) {  // Decrement the timer if not zero
             timer_countdown--;
         } else if (!game_over) {  // Transition to "Game Over" if timer reaches zero
-            game_over = 1;  // Set the game over flag
-            char *game_over_msg = "Game Over";
-            LCD_Setup();
-            LCD_Clear(BLACK);
-            splitAndDisplayString(game_over_msg);
+            outOfTime();;
         }
     }
 
@@ -898,44 +841,71 @@ void SysTick_Handler() {
     int current_row_val = GPIOC->IDR;  // Read the row pins
     if (current_row_val) {  // If a key is pressed
 
+        if(current_col == 3) //RESET BUTTON 
+        {
+            if(current_row_val & 0x1)
+            {
+                key_pressed = 1;      // Set the key pressed flag
+                timer_countdown = 20; // Reset the timer to 20 seconds (but it continues counting down)
+                game_over = 0;        // Clear the game over flag
+                // char *question = "Press a key to restart"; 
+                char *question = "Press 1 to start";
+                LCD_Setup(); 
+                LCD_Clear(BLACK);
+                splitAndDisplayString(question); 
+            }
+        }
 
-if(current_col == 3) //RESET BUTTON 
-{
-    if(current_row_val&0x1)
-    {
-        key_pressed = 1;      // Set the key pressed flag
-        timer_countdown = 10; // Reset the timer to 20 seconds (but it continues counting down)
-        game_over = 0;        // Clear the game over flag
-         char *question = "Press a key to restart"; 
-        LCD_Setup(); 
-        LCD_Clear(BLACK);
-        splitAndDisplayString(question); 
-    }
-}
-
+        if (current_col == 1) { // First question
+            if (current_row_val & 0x8) {
+                nextQuestion();
+            }
+        }
+    
         // Handle specific key presses (row 4 example)
         if (current_col == 4) {
-            if (current_row_val & 0x1) {  // Key D
-                char *question = "Free Imran Khan";
-                LCD_Setup();
-                LCD_Clear(BLACK);
-                splitAndDisplayString(question);
-            } else if (current_row_val & 0x2) {  // Key C
-                char *question = "Free massage 6507858464";
-                LCD_Setup();
-                LCD_Clear(BLACK);
-                splitAndDisplayString(question);
-            } else if (current_row_val & 0x4) {  // Key B
-                char *question = "Free Patti";
-                LCD_Setup();
-                LCD_Clear(BLACK);
-                splitAndDisplayString(question);
-            } else if (current_row_val & 0x8) {  // Key A
-                char *question = "Free Badhri";
-                LCD_Setup();
-                LCD_Clear(BLACK);
-                splitAndDisplayString(question);
+
+            // Map choices
+            char choice = 0;
+            if (current_row_val & 0x1) {
+                choice = 'D';
+            } else if (current_row_val & 0x2) {
+                choice = 'C';
+            } else if (current_row_val & 0x4) {
+                choice = 'B';
+            } else if (current_row_val & 0x8) {
+                choice = 'A';
             }
+
+            if (choice) { // If A, B, C, or D is pressed, check answer and load next question / game over
+                checkAnswer(choice);
+            }
+
+            // if (current_row_val & 0x1) {  // Key D
+            //     // char *question = "Free Imran Khan";
+            //     char *question = printRandomQuestion(questions, question_count, ++question_index);
+            //     LCD_Setup();
+            //     LCD_Clear(BLACK);
+            //     splitAndDisplayString(question);
+            // } else if (current_row_val & 0x2) {  // Key C
+            //     // char *question = "Free massage 6507858464";
+            //     char *question = printRandomQuestion(questions, question_count, ++question_index);
+            //     LCD_Setup();
+            //     LCD_Clear(BLACK);
+            //     splitAndDisplayString(question);
+            // } else if (current_row_val & 0x4) {  // Key B
+            //     // char *question = "Free Patti";
+            //     char *question = printRandomQuestion(questions, question_count, ++question_index);
+            //     LCD_Setup();
+            //     LCD_Clear(BLACK);
+            //     splitAndDisplayString(question);
+            // } else if (current_row_val & 0x8) {  // Key A
+            //     // char *question = "Free Badhri";
+            //     char *question = printRandomQuestion(questions, question_count, ++question_index);
+            //     LCD_Setup();
+            //     LCD_Clear(BLACK);
+            //     splitAndDisplayString(question);
+            // }
         }
     }
 
@@ -946,8 +916,6 @@ if(current_col == 3) //RESET BUTTON
     }
     set_col(current_col);
 }
-
-
 
 /**
  * @brief For the keypad pins, 
@@ -969,12 +937,18 @@ void set_col(int col) {
 }
 
 
+
+
+
 int main() {
+
+    /* Setup */
     internal_clock();
     //init_usart5();
     enable_tty_interrupt();
     initc();
     init_systick();
+
     /* Open command shell */
     // setbuf(stdin,0); // These turn off buffering; more efficient, but makes it hard to explain why first 1023 characters not dispalyed
     // setbuf(stdout,0);
@@ -1016,21 +990,25 @@ int main() {
 
         //char *question = "hello world"; 
 
-        char *question = "Press a key to begin"; 
+        // Start game
+        char *question = "\n\n\n     Who's going to be a millionaire? \n            Press 1 to start"; 
         LCD_Setup(); 
         LCD_Clear(BLACK);
         splitAndDisplayString(question); 
+
         //delay_ms(2000);
         //LCD_Clear(BLACK);
 
         //delay_ms(1000); 
         // splitAndDisplayString(question2); 
 
+        /* When game is over, reset question_index to 0. Hit # to go back to the title screen. Hit 1 again to start the game.
+            When in a question, you should not be able to hit 1 to go to next. */
+
         while(1)
         {
 
         }
-
 
         // delay_ms(1000); 
         
@@ -1039,18 +1017,20 @@ int main() {
         // LCD_Clear(BLACK);
         // splitAndDisplayString(question); 
 
-
-
-
         //delay_ms(100);
     //     question_index++;
     // }
+
+
+
+
 
     /* Use timer to iterate through questions and check keypad */
     // LCD_Setup(); 
     // LCD_Clear(BLACK);
     // start_game();
     // init_tim2();
+
 
     /* Display scoreboard */
     // int *score = {100, 200, 500, 1000, 10000, 100000, 10000000};

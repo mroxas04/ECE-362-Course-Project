@@ -11,7 +11,7 @@
 typedef struct {
     char question[500];  
     char choices[NUM_CHOICES][128]; 
-    int correct_answer;
+    char correct_answer[5];
 } Question;
 
 void loadQuestionsFromJSON(const char *filename, Question *questions, int *question_count);
