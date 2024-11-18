@@ -553,12 +553,13 @@ void usart1_send_string(const char *str) {
 
 //BUZZER//
 void init_buzzer() {
-    // Enable GPIOA clock
     RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
 
-    // Configure PA5 as output
+    // PA5 as output
     GPIOA->MODER &= ~(GPIO_MODER_MODER5);  // Clear mode bits for PA5
-    GPIOA->MODER |= GPIO_MODER_MODER5_0;  // Set PA5 as general-purpose output
+    GPIOA->MODER |= GPIO_MODER_MODER5_0;  // Set PA5 as output ? 10 , ding dong 
+
+     GPIOA->ODR |= GPIO_ODR_5;  // Set PA5 high
 }
 
 void buzzer_on() {
@@ -576,6 +577,7 @@ void delay(volatile uint32_t time) {
 
 int main() {
     internal_clock();
+    init_buzzer();
     init_usart5();
     enable_tty_interrupt();
     init_usart1_tx(); //FOR USART
@@ -612,22 +614,23 @@ int main() {
     LCD_Clear(WHITE);
     splitAndDisplayString(question); 
     
-    ///usart for second stm
-     while (1) {
-        // usart1_send_string("Hello from STM TX!\r\n");
-        usart1_send_char('a');
-        for (volatile int i = 0; i < 1000000; i++);  // Delay loop
-    }
+    // ///usart for second stm
+    //  while (1) {
+    //     // usart1_send_string("Hello from STM TX!\r\n");
+    //     usart1_send_char('a');
+    //     for (volatile int i = 0; i < 1000000; i++);  // Delay loop
+    // }
     
 
     //buzzer code 
-    init_buzzer();
+    // init_buzzer();
+    // buzzer_on();
 
-    while (1) {
-        buzzer_on();
-        delay(1000000);  // Delay for buzzer on
-        buzzer_off();
-        delay(1000000);  // Delay for buzzer off
-    }
+    // while (1) {
+    //     buzzer_on();
+    //     // delay(100000000);  //  buzzer on
+    //     // buzzer_off();
+    //     // delay(100000000);  // buzzer off
+    // }
 }
 #endif
