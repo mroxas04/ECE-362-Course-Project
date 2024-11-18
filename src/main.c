@@ -716,6 +716,7 @@ void init_systick() {
   SysTick->CTRL |= 0x3;
 }
 
+
 volatile int current_col = 1;
 
 /**
@@ -811,7 +812,7 @@ void nextQuestion() {
     LCD_Setup();
     LCD_Clear(BLACK);
     splitAndDisplayString(question);
-    timer_countdown = 20;
+    // timer_countdown = 20;
 }
 
 void checkAnswer(char answer) {
@@ -819,6 +820,7 @@ void checkAnswer(char answer) {
         wrongAnswer();
     }
     else {
+        timer_countdown = 10;
         correctAnswer();
     }
 }
@@ -833,7 +835,7 @@ void SysTick_Handler() {
         if (timer_countdown > 0) {  // Decrement the timer if not zero
             timer_countdown--;
         } else if (!game_over) {  // Transition to "Game Over" if timer reaches zero
-            outOfTime();;
+            outOfTime();
         }
     }
 
@@ -846,7 +848,7 @@ void SysTick_Handler() {
             if(current_row_val & 0x1)
             {
                 key_pressed = 1;      // Set the key pressed flag
-                timer_countdown = 20; // Reset the timer to 20 seconds (but it continues counting down)
+                timer_countdown = 10; // Reset the timer to 20 seconds (but it continues counting down)
                 game_over = 0;        // Clear the game over flag
                 // char *question = "Press a key to restart"; 
                 char *question = "Press 1 to start";

@@ -2,6 +2,7 @@
     "files.associations": {
         "stdint.h": "c",
         "questions.h": "c",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "string.h": "c"
     }
 }
