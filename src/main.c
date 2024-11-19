@@ -780,6 +780,31 @@ volatile int current_col = 1;
 //    set_col(current_col);
 // }
 
+
+/////buzzer ////////////////////////////////////////////////////////////////////////////
+void init_buzzer() {
+    RCC->AHBENR |= RCC_AHBENR_GPIOAEN;   // Enable GPIOB clock
+
+    GPIOA->MODER &= ~GPIO_MODER_MODER5; // Clear mode bits for PB5
+    GPIOA->MODER |= GPIO_MODER_MODER5_0; // Set Pa5 to output mode
+     
+    GPIOA->OTYPER &= ~GPIO_OTYPER_OT_5;  // Set Pa5 to push-pull
+    GPIOA->OSPEEDR |= GPIO_OSPEEDR_OSPEEDR5; // Set Pa5 to high speed
+    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR5;  // No pull-up or pull-down
+}
+
+void buzzer_beep() {
+    for (int i = 0; i < 3; i++) { // Beep 3 times
+        GPIOA->ODR |= (1 << 5);  // Set PA5 high
+        delay_ms(5000);
+        GPIOA->ODR &= ~(1 << 5); // Set Pa5 low
+        delay_ms(5000);
+    }
+}
+
+/////BUZZER CODE//////////////////////////////////////////////////////////////////////////
+
+
 void outOfTime() {
     question_index = -1;
     game_over = 1;  // Set the game over flag
@@ -994,26 +1019,6 @@ void usart1_send_string(const char *str) {
     }
 }
 ////UART CODE DONE ///////////////////////////////////////////////////////////////////////
-void init_buzzer() {
-    RCC->AHBENR |= RCC_AHBENR_GPIOAEN;   // Enable GPIOB clock
-    GPIOA->MODER |= GPIO_MODER_MODER5_0; // Set Pa5 to output mode
-    GPIOA->MODER &= ~GPIO_MODER_MODER5;  // Clear mode bits for PB5
-    GPIOA->OTYPER &= ~GPIO_OTYPER_OT_5;  // Set Pa5 to push-pull
-    GPIOA->OSPEEDR |= GPIO_OSPEEDR_OSPEEDR5; // Set Pa5 to high speed
-    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR5;  // No pull-up or pull-down
-}
-
-void buzzer_beep() {
-    for (int i = 0; i < 3; i++) { // Beep 3 times
-        GPIOA->ODR |= (1 << 5);  // Set PA5 high
-        for (volatile int j = 0; j < 100000; j++);  // Delay
-        GPIOA->ODR &= ~(1 << 5); // Set Pa5 low
-        for (volatile int j = 0; j < 100000; j++);  // Delay
-    }
-}
-
-/////BUZZER CODE//////////////////////////////////////////////////////////////////////////
-
 
 
 int main() {
@@ -1085,8 +1090,8 @@ int main() {
         // init_usart1_tx(); //FOR USART
         while(1)
         {
-        // usart1_send_string("Hello from STM TX!\r\n");
-        //  usart1_send_char('a');
+         // usart1_send_string("Hello from STM TX!\r\n");
+        usart1_send_char('a');
         for (volatile int i = 0; i < 1000000; i++);  // Delay loop
 
         }
