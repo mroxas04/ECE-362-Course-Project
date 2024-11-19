@@ -805,6 +805,7 @@ void correctAnswer() {
     LCD_Setup();
     LCD_Clear(BLACK);
     splitAndDisplayString(right);
+    usart1_send_char('a');
     // hold timer
 }
 
@@ -1058,11 +1059,11 @@ int main() {
 
         /* When game is over, reset question_index to 0. Hit # to go back to the title screen. Hit 1 again to start the game.
             When in a question, you should not be able to hit 1 to go to next. */
-        init_usart1_tx(); //FOR USART
+       init_usart1_tx(); //FOR USART
         while(1)
         {
-         // usart1_send_string("Hello from STM TX!\r\n");
-        usart1_send_char('a');
+        // usart1_send_string("Hello from STM TX!\r\n");
+        //  usart1_send_char('a');
         for (volatile int i = 0; i < 1000000; i++);  // Delay loop
 
         }
