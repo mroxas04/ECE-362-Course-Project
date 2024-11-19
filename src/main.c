@@ -540,6 +540,9 @@ int main() {
     init_usart5();
     enable_tty_interrupt();
     
+
+    LCD_Setup(); 
+    LCD_Clear(BLACK);
     /* Open command shell */
     // setbuf(stdin,0); // These turn off buffering; more efficient, but makes it hard to explain why first 1023 characters not dispalyed
     // setbuf(stdout,0);
@@ -589,14 +592,14 @@ int main() {
     // }
     
     /* Display question */
-    srand(time(NULL));
-    Question questions[MAX_QUESTIONS];
-    int question_count;
-    loadQuestionsFromJSON("qs_3.txt", questions, &question_count);
-    char *question = printRandomQuestion(questions, question_count);
-    LCD_Setup(); 
-    LCD_Clear(BLACK);
-    splitAndDisplayString(question); 
+    // srand(time(NULL));
+    // Question questions[MAX_QUESTIONS];
+    // int question_count;
+    // loadQuestionsFromJSON("qs_3.txt", questions, &question_count);
+    // char *question = printRandomQuestion(questions, question_count);
+    // LCD_Setup(); 
+    // LCD_Clear(BLACK);
+    // splitAndDisplayString(question); 
 
     /* Display scoreboard */
     // int *score = {100, 200, 500, 1000, 10000, 100000, 10000000};
@@ -607,11 +610,27 @@ int main() {
     //create a timer which displays the question for 10 seconds, then the options for 10 seconds and once it finishes, the game ends 
 
     //optional: add leaderboard to the thing 
+    init_usart1_rx();
+    char buffer[100];
+
+
+    while (1) {
+        usart1_receive_string(buffer, sizeof(buffer));
+        if (buffer != NULL) {
+            splitAndDisplayString(buffer);
+        }
+        //NOW WRITE LOGIC TO PUT IT ON TFT 
+    }
 
     //add game ending and starting display and maybe if time option to take away ur winnings before each new question 
 }
 #endif
 /// error from here  
+    //char *score; 
+    // LCD_Setup(); 
+    // LCD_Clear(BLACK);
+    //splitAndDisplayString(score); 
+
 
 
 void init_usart1_rx() {
@@ -659,12 +678,3 @@ void usart1_receive_string(char *buffer, int max_length) {
     buffer[i] = '\0';  // Null-terminate the string
 }
 
-int main(void) {
-    init_usart1_rx();
-    char buffer[100];
-
-    while (1) {
-        usart1_receive_string(buffer, sizeof(buffer));
-        //NOW WRITE LOGIC TO PUT IT ON TFT 
-    }
-}
