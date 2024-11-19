@@ -1003,6 +1003,7 @@ int main() {
     enable_tty_interrupt();
     initc();
     init_systick();
+    init_usart1_tx(); //FOR USART
 
     /* Open command shell */
     // setbuf(stdin,0); // These turn off buffering; more efficient, but makes it hard to explain why first 1023 characters not dispalyed
@@ -1059,7 +1060,7 @@ int main() {
 
         /* When game is over, reset question_index to 0. Hit # to go back to the title screen. Hit 1 again to start the game.
             When in a question, you should not be able to hit 1 to go to next. */
-       init_usart1_tx(); //FOR USART
+        // init_usart1_tx(); //FOR USART
         while(1)
         {
         // usart1_send_string("Hello from STM TX!\r\n");
