@@ -22,7 +22,7 @@ const char* username = "kanchan";
 
 void internal_clock();
 void init_usart1_tx();
-
+void usart1_send_char(char c);
 // Uncomment only one of the following to test each step
 // #define STEP1
 // #define STEP2
@@ -1091,8 +1091,8 @@ int main() {
         while(1)
         {
          // usart1_send_string("Hello from STM TX!\r\n");
-        usart1_send_char('a');
-        for (volatile int i = 0; i < 1000000; i++);  // Delay loop
+        // usart1_send_char('a');
+        // for (volatile int i = 0; i < 1000000; i++);  // Delay loop
 
         }
 
