@@ -994,19 +994,19 @@ void usart1_send_string(const char *str) {
 }
 ////UART CODE DONE ///////////////////////////////////////////////////////////////////////
 void init_buzzer() {
-    RCC->AHBENR |= RCC_AHBENR_GPIOBEN;   // Enable GPIOB clock
-    GPIOB->MODER &= ~GPIO_MODER_MODER5;  // Clear mode bits for PB5
-    GPIOB->MODER |= GPIO_MODER_MODER5_0; // Set PB5 to output mode
-    GPIOB->OTYPER &= ~GPIO_OTYPER_OT_5;  // Set PB5 to push-pull
-    GPIOB->OSPEEDR |= GPIO_OSPEEDR_OSPEEDR5; // Set PB5 to high speed
-    GPIOB->PUPDR &= ~GPIO_PUPDR_PUPDR5;  // No pull-up or pull-down
+    RCC->AHBENR |= RCC_AHBENR_GPIOAEN;   // Enable GPIOB clock
+    GPIOA->MODER |= GPIO_MODER_MODER5_0; // Set Pa5 to output mode
+    GPIOA->MODER &= ~GPIO_MODER_MODER5;  // Clear mode bits for PB5
+    GPIOA->OTYPER &= ~GPIO_OTYPER_OT_5;  // Set Pa5 to push-pull
+    GPIOA->OSPEEDR |= GPIO_OSPEEDR_OSPEEDR5; // Set Pa5 to high speed
+    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR5;  // No pull-up or pull-down
 }
 
 void buzzer_beep() {
     for (int i = 0; i < 3; i++) { // Beep 3 times
-        GPIOB->ODR |= (1 << 5);  // Set PB5 high
+        GPIOA->ODR |= (1 << 5);  // Set PA5 high
         for (volatile int j = 0; j < 100000; j++);  // Delay
-        GPIOB->ODR &= ~(1 << 5); // Set PB5 low
+        GPIOA->ODR &= ~(1 << 5); // Set Pa5 low
         for (volatile int j = 0; j < 100000; j++);  // Delay
     }
 }
