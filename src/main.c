@@ -3,7 +3,9 @@
 #include <stdint.h>
 #include <string.h>
 void internal_clock();
-
+void init_usart1_rx();
+void usart1_receive_string(char *buffer, int max_length);
+char usart1_receive_char();
 // Uncomment only one of the following to test each step
 // #define STEP1
 // #define STEP2
@@ -612,13 +614,13 @@ int main() {
     //optional: add leaderboard to the thing 
     init_usart1_rx();
     char buffer[100];
-
+    // char *test = "hello";
+    // splitAndDisplayString(test);
 
     while (1) {
-        usart1_receive_string(buffer, sizeof(buffer));
-        if (buffer != NULL) {
-            splitAndDisplayString(buffer);
-        }
+        char test = usart1_receive_char();
+        splitAndDisplayString(test);
+
         //NOW WRITE LOGIC TO PUT IT ON TFT 
     }
 
@@ -665,7 +667,7 @@ void init_usart1_rx() {
 
 char usart1_receive_char() {
     while (!(USART1->ISR & USART_ISR_RXNE));  // Wait until RX buffer is not empty
-    return USART1->RDR;                      // Read received character
+    return (uint8_t) (USART1->RDR);                      // Read received character
 }
 
 void usart1_receive_string(char *buffer, int max_length) {
