@@ -618,8 +618,8 @@ int main() {
     // splitAndDisplayString(test);
 
     while (1) {
-        char test = usart1_receive_char();
-        splitAndDisplayString(&test);
+        usart1_receive_string(buffer, sizeof(buffer));
+        splitAndDisplayString(buffer);
 
         //NOW WRITE LOGIC TO PUT IT ON TFT 
     }
