@@ -619,7 +619,7 @@ int main() {
 
     while (1) {
         char test = usart1_receive_char();
-        splitAndDisplayString(test);
+        splitAndDisplayString(&test);
 
         //NOW WRITE LOGIC TO PUT IT ON TFT 
     }
@@ -667,7 +667,8 @@ void init_usart1_rx() {
 
 char usart1_receive_char() {
     while (!(USART1->ISR & USART_ISR_RXNE));  // Wait until RX buffer is not empty
-    return (uint8_t) (USART1->RDR);                      // Read received character
+    int value = USART1 -> RDR;
+    return (uint8_t) value;                      // Read received character
 }
 
 void usart1_receive_string(char *buffer, int max_length) {
