@@ -23,6 +23,8 @@ const char* username = "kanchan";
 void internal_clock();
 void init_usart1_tx();
 void usart1_send_char(char c);
+
+int* score = 0;
 // Uncomment only one of the following to test each step
 // #define STEP1
 // #define STEP2
@@ -827,12 +829,15 @@ void wrongAnswer() {
     buzzer_beep();  // Buzzer beep wOMP Womp answer 
 }
 
-void correctAnswer() {
+void correctAnswer(int* score) {
     char *right = "Correct! Press 1 for next question.";
+    char scoreString[100];
+    score++;
     LCD_Setup();
     LCD_Clear(BLACK);
     splitAndDisplayString(right);
-    usart1_send_char('a');
+    snprintf(scoreString, sizeof(scoreString), "Your score is %d", score);
+    usart1_send_string(scoreString);
     // hold timer
 }
 
@@ -1091,8 +1096,8 @@ int main() {
         while(1)
         {
          // usart1_send_string("Hello from STM TX!\r\n");
-        usart1_send_char('a');
-        for (volatile int i = 0; i < 1000000; i++);  // Delay loop
+        // usart1_send_char('a');
+        // for (volatile int i = 0; i < 1000000; i++);  // Delay loop
 
         }
 
