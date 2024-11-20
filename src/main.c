@@ -633,4 +633,114 @@ int main() {
     //     // delay(100000000);  // buzzer off
     // }
 }
+
+
+
+// // Define GPIO pins and ports
+// #define NAV_BUTTON_PIN 0   // GPIOA Pin 0 for navigation
+// #define SEL_BUTTON_PIN 1   // GPIOA Pin 1 for selection
+
+// // Define UART for displaying usernames
+// #define UART_TX_PIN 2      // GPIOA Pin 2 (USART2 TX)
+
+// // Usernames array
+// const char *usernames[] = {"Alice", "Bob", "Charlie", "David", "Eve"};
+// const int num_users = sizeof(usernames) / sizeof(usernames[0]);
+
+// volatile int current_index = 0;
+// volatile int selected = 0;
+
+// // Function prototypes
+// void GPIO_Init(void);
+// void UART_Init(void);
+// void UART_SendString(const char *str);
+// int is_button_pressed(uint8_t pin);
+// void delay_ms(int ms);
+
+// int main(void) {
+//     // Initialize GPIOs and UART
+//     GPIO_Init();
+//     UART_Init();
+
+//     // Initial display
+//     UART_SendString("Current username: ");
+//     UART_SendString(usernames[current_index]);
+//     UART_SendString("\r\n");
+
+//     while (1) {
+//         // Check if navigation button is pressed
+//         if (is_button_pressed(NAV_BUTTON_PIN)) {
+//             current_index = (current_index + 1) % num_users;
+
+//             // Display updated username
+//             UART_SendString("Current username: ");
+//             UART_SendString(usernames[current_index]);
+//             UART_SendString("\r\n");
+
+//             // Debounce
+//             delay_ms(200);
+//         }
+
+//         // Check if selection button is pressed
+//         if (is_button_pressed(SEL_BUTTON_PIN)) {
+//             selected = 1;
+
+//             // Display selected username
+//             UART_SendString("Selected username: ");
+//             UART_SendString(usernames[current_index]);
+//             UART_SendString("\r\n");
+
+//             // Debounce
+//             delay_ms(200);
+//         }
+//     }
+// }
+
+// // Initialize GPIOs
+// void GPIO_Init(void) {
+//     // Enable clock for GPIOA
+//     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+
+//     // Configure NAV_BUTTON_PIN and SEL_BUTTON_PIN as inputs
+//     GPIOA->MODER &= ~(0x3 << (NAV_BUTTON_PIN * 2)); // Input mode
+//     GPIOA->MODER &= ~(0x3 << (SEL_BUTTON_PIN * 2)); // Input mode
+
+//     // Enable pull-up resistors for buttons
+//     GPIOA->PUPDR |= (0x1 << (NAV_BUTTON_PIN * 2));  // Pull-up for NAV_BUTTON_PIN
+//     GPIOA->PUPDR |= (0x1 << (SEL_BUTTON_PIN * 2));  // Pull-up for SEL_BUTTON_PIN
+// }
+
+// // Initialize UART
+// void UART_Init(void) {
+//     // Enable clock for GPIOA and USART2
+//     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+//     RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
+
+//     // Configure UART TX pin as alternate function
+//     GPIOA->MODER |= (0x2 << (UART_TX_PIN * 2));    // Alternate function mode
+//     GPIOA->AFR[0] |= (0x7 << (UART_TX_PIN * 4));   // AF7 (USART2) for TX
+
+//     // Configure USART2 for 9600 baud, 8N1
+//     USART2->BRR = 0x683;                          // Assuming 16 MHz clock, 9600 baud
+//     USART2->CR1 = USART_CR1_TE | USART_CR1_UE;    // Enable transmitter and USART
+// }
+
+// // Send a string via UART
+// void UART_SendString(const char *str) {
+//     while (*str) {
+//         while (!(USART2->SR & USART_SR_TXE)); // Wait until TXE (Transmit Data Register Empty)
+//         USART2->DR = *str++;                 // Send character
+//     }
+// }
+
+// // Check if a button is pressed
+// int is_button_pressed(uint8_t pin) {
+//     return !(GPIOA->IDR & (1 << pin)); // Return true if button is pressed (active low)
+// }
+
+// // Simple delay function (blocking)
+// void delay_ms(int ms) {
+//     for (volatile int i = 0; i < ms * 16000; i++); // Assuming ~16 MHz clock
+// }
+
 #endif
