@@ -24,7 +24,7 @@ void internal_clock();
 void init_usart1_tx();
 void usart1_send_char(char c);
 void usart1_send_string(const char *str);
-
+int money[7] = {100, 200, 500, 1000, 10000, 100000, 10000000};
 volatile int actualScore = 0;
 int* score = &actualScore;
 // Uncomment only one of the following to test each step
@@ -834,7 +834,7 @@ void wrongAnswer() {
 void correctAnswer(int* score) {
     char *right = "Correct! Press 1 for next question.";
     // char scoreString[100];
-    *score += 100;
+    *score = money[question_index];
     LCD_Setup();
     LCD_Clear(BLACK);
     splitAndDisplayString(right);
@@ -1073,7 +1073,7 @@ int main() {
     // splitAndDisplayString(question); 
 
     /* Go to the next question when timer reaches 0 */
-    loadQuestionsFromJSON("qs_3.txt", questions, &question_count);
+    loadQuestionsFromJSON("more_qs.txt", questions, &question_count);
 
     //while (question_index < question_count) {
         //char *question = printRandomQuestion(questions, question_count, 0);
