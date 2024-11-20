@@ -25,7 +25,8 @@ void init_usart1_tx();
 void usart1_send_char(char c);
 void usart1_send_string(const char *str);
 
-int* score = 0;
+volatile int actualScore = 0;
+int* score = &actualScore;
 // Uncomment only one of the following to test each step
 // #define STEP1
 // #define STEP2
@@ -832,14 +833,14 @@ void wrongAnswer() {
 
 void correctAnswer(int* score) {
     char *right = "Correct! Press 1 for next question.";
-    char scoreString[100];
-    score++;
+    // char scoreString[100];
+    *score += 100;
     LCD_Setup();
     LCD_Clear(BLACK);
     splitAndDisplayString(right);
     // snprintf(scoreString, sizeof(scoreString), "Your score is %s", score);
     // usart1_send_string(scoreString);
-    usart1_send_char('a');
+    // usart1_send_char('a');
     // hold timer
 }
 
@@ -856,7 +857,7 @@ void checkAnswer(char answer) {
         wrongAnswer();
     }
     else {
-        correctAnswer(*score);
+        correctAnswer(score);
     }
 }
 
@@ -1029,7 +1030,6 @@ void usart1_send_string(const char *str) {
 
 
 int main() {
-
     /* Setup */
     internal_clock();
     //init_usart5();
@@ -1095,13 +1095,15 @@ int main() {
         /* When game is over, reset question_index to 0. Hit # to go back to the title screen. Hit 1 again to start the game.
             When in a question, you should not be able to hit 1 to go to next. */
         // init_usart1_tx(); //FOR USART
+        char testScore[100];
+        *score = 0;
         while(1)
         {
         //  usart1_send_string("LMAOOOO!\r\n");
       //  usart1_send_char('a');
-    //   char testScore[100];
-    //     snprintf(testScore, sizeof(testScore), "Your score is %s", score);
-    //     usart1_send_string(testScore);
+      
+        snprintf(testScore, sizeof(testScore), "You currently have $%d!\n", *score);
+        usart1_send_string(testScore);
        for (volatile int i = 0; i < 1000000; i++);  // Delay loop
 
         }
