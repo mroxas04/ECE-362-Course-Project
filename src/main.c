@@ -838,6 +838,7 @@ void correctAnswer(int* score) {
     splitAndDisplayString(right);
     snprintf(scoreString, sizeof(scoreString), "Your score is %d", score);
     usart1_send_string(scoreString);
+    // usart1_send_char('a');
     // hold timer
 }
 
@@ -854,7 +855,7 @@ void checkAnswer(char answer) {
         wrongAnswer();
     }
     else {
-        correctAnswer();
+        correctAnswer(*score);
     }
 }
 
@@ -1095,9 +1096,9 @@ int main() {
         // init_usart1_tx(); //FOR USART
         while(1)
         {
-         // usart1_send_string("Hello from STM TX!\r\n");
+         usart1_send_string("Hello from STM TX!\r\n");
       //  usart1_send_char('a');
-       // for (volatile int i = 0; i < 1000000; i++);  // Delay loop
+       for (volatile int i = 0; i < 1000000; i++);  // Delay loop
 
         }
 
