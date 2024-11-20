@@ -27,6 +27,7 @@ void usart1_send_string(const char *str);
 int money[7] = {100, 200, 500, 1000, 10000, 100000, 10000000};
 volatile int actualScore = 0;
 int* score = &actualScore;
+char *selected_user;
 // Uncomment only one of the following to test each step
 // #define STEP1
 // #define STEP2
@@ -861,6 +862,14 @@ void checkAnswer(char answer) {
     }
 }
 
+void chooseUser() {
+    if (current_row_val) {
+        if (current_col == 1) {
+            if (current_row_val)
+        }
+    }
+}
+
 void SysTick_Handler() {
     static int systick_ticks = 0;  // Counts SysTick ticks (1/16 second per tick)
 
@@ -891,6 +900,14 @@ void SysTick_Handler() {
                 LCD_Setup(); 
                 LCD_Clear(BLACK);
                 splitAndDisplayString(question); 
+            }
+        }
+
+        if (current_col == 1) { // Choose user
+            if (current_row_val & 0x1) {
+                timer_countdown = 30;
+                // display list of users
+                chooseUser();
             }
         }
 
@@ -1081,7 +1098,7 @@ int main() {
         //char *question = "hello world"; 
 
         // Start game
-        char *question = "\n\n\n     Who's going to be a millionaire? \n            Press 1 to start"; 
+        char *question = "\n\n\n     Who's going to be a millionaire? \n            Press * to choose user"; 
         LCD_Setup(); 
         LCD_Clear(BLACK);
         splitAndDisplayString(question); 
