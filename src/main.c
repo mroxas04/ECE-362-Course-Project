@@ -1096,8 +1096,8 @@ int main() {
         while(1)
         {
          // usart1_send_string("Hello from STM TX!\r\n");
-        // usart1_send_char('a');
-        // for (volatile int i = 0; i < 1000000; i++);  // Delay loop
+      //  usart1_send_char('a');
+       // for (volatile int i = 0; i < 1000000; i++);  // Delay loop
 
         }
 
