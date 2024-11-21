@@ -490,6 +490,7 @@ void init_lcd_spi(void) {
 #include "cJSON.h"
 #include "questions.h"
 #include "lcd.h"
+#include "scoreboard.h"
 
 #define MAX_STRING_LENGTH 40  // Max length per string to fit on the LCD
 
@@ -581,6 +582,8 @@ volatile int question_active = 0;      // Whether a question is active
 int question_index = -1;                // Index of the current question
 Question questions[MAX_QUESTIONS];      // Array of questions
 int question_count = 0;                // Total number of questions
+Username users[10];
+int user_count = 0;
 
 // Key scanning
 // 16 history bytes.  Each byte represents the last 8 samples of a button.
@@ -1091,6 +1094,8 @@ int main() {
 
     /* Go to the next question when timer reaches 0 */
     loadQuestionsFromJSON("more_qs.txt", questions, &question_count);
+    loadUsernamesFromJSON("leaderboard.txt", users, &user_count);
+
 
     //while (question_index < question_count) {
         //char *question = printRandomQuestion(questions, question_count, 0);
@@ -1124,6 +1129,10 @@ int main() {
        for (volatile int i = 0; i < 1000000; i++);  // Delay loop
 
         }
+
+        saveUsernamesToJSON("leaderboard.txt", users, &user_count);
+
+
 
         // delay_ms(1000); 
         

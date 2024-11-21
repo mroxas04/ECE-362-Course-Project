@@ -1,17 +1,13 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "ff.h"        // FATFS library header
-#include "cJSON.h"     // cJSON library header
+#include "scoreboard.h"
 
 FATFS fs;              // File system object
 FIL file;              // File object
 FRESULT fr;            // File operation result
 
-// Function to read the contents of a file into a string using FATFS
+// Function to read JSON file using FATFS
 char *fatfs_read_file(const char *filename) {
-    char *content = NULL;
     UINT br; // Bytes read
+    char *content = NULL;
 
     // Open the file for reading
     fr = f_open(&file, filename, FA_READ);
@@ -20,7 +16,7 @@ char *fatfs_read_file(const char *filename) {
         return NULL;
     }
 
-    // Get the file size
+    // Get file size
     DWORD size = f_size(&file);
     content = malloc(size + 1);
     if (!content) {
@@ -29,7 +25,7 @@ char *fatfs_read_file(const char *filename) {
         return NULL;
     }
 
-    // Read the file contents
+    // Read file content
     fr = f_read(&file, content, size, &br);
     if (fr != FR_OK || br != size) {
         printf("Failed to read file: %s (Error: %d)\n", filename, fr);
@@ -37,24 +33,23 @@ char *fatfs_read_file(const char *filename) {
         f_close(&file);
         return NULL;
     }
-
-    content[size] = '\0'; // Null-terminate the string
+    content[size] = '\0'; // Null-terminate string
     f_close(&file);
     return content;
 }
 
-// Function to write a string to a file using FATFS
+// Function to write JSON file using FATFS
 void fatfs_write_file(const char *filename, const char *content) {
     UINT bw; // Bytes written
 
     // Open the file for writing (create/overwrite)
     fr = f_open(&file, filename, FA_WRITE | FA_CREATE_ALWAYS);
     if (fr != FR_OK) {
-        printf("Failed to open file: %s (Error: %d)\n", filename, fr);
+        printf("Failed to open file for writing: %s (Error: %d)\n", filename, fr);
         return;
     }
 
-    // Write the content to the file
+    // Write content to file
     fr = f_write(&file, content, strlen(content), &bw);
     if (fr != FR_OK || bw != strlen(content)) {
         printf("Failed to write file: %s (Error: %d)\n", filename, fr);
@@ -63,9 +58,8 @@ void fatfs_write_file(const char *filename, const char *content) {
     f_close(&file);
 }
 
-int main() {
-    const char *filename = "scores.json";
-
+// Load usernames from JSON
+void loadUsernamesFromJSON(const char *filename, Username *users, int *user_count) {
     // Mount the FATFS file system
     fr = f_mount(&fs, "", 1);
     if (fr != FR_OK) {
@@ -73,49 +67,57 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    // Step 1: Read the JSON file
     char *json_data = fatfs_read_file(filename);
-    if (!json_data) {
-        return EXIT_FAILURE;
-    }
+    if (!json_data) return;
 
-    // Step 2: Parse the JSON data
     cJSON *json = cJSON_Parse(json_data);
-    free(json_data); // Free the allocated memory for the file content
+    free(json_data); // Free memory for file content
     if (!json) {
         printf("Error parsing JSON\n");
-        return EXIT_FAILURE;
+        return;
     }
 
-    // Step 3: Update scores
-    cJSON *user1_score = cJSON_GetObjectItem(json, "user1");
-    if (user1_score && cJSON_IsNumber(user1_score)) {
-        user1_score->valuedouble += 10; // Increment score for user1
+    // Populate user array from JSON object
+    *user_count = 0;
+    cJSON *user_item;
+    cJSON_ArrayForEach(user_item, json) {
+        if (*user_count >= 10) break; // Limit to 10 users
+
+        users[*user_count].username = strdup(user_item->string);
+        users[*user_count].score = cJSON_GetNumberValue(user_item);
+        (*user_count)++;
     }
 
-    cJSON *user2_score = cJSON_GetObjectItem(json, "user2");
-    if (user2_score && cJSON_IsNumber(user2_score)) {
-        user2_score->valuedouble += 20; // Increment score for user2
+    cJSON_Delete(json); // Free cJSON object
+}
+
+// Comparator function for sorting in descending order
+int compareScores(const void *a, const void *b) {
+    Username *userA = (Username *)a;
+    Username *userB = (Username *)b;
+    return userB->score - userA->score; // Descending order
+}
+
+// Save usernames back to JSON
+void saveUsernamesToJSON(const char *filename, Username *users, int user_count) {
+    // Sort usernames by score in descending order
+    qsort(users, user_count, sizeof(Username), compareScores);
+
+    // Create a new JSON object
+    cJSON *json = cJSON_CreateObject();
+
+    // Add usernames and scores to JSON object
+    for (int i = 0; i < user_count; i++) {
+        cJSON_AddNumberToObject(json, users[i].username, users[i].score);
     }
 
-    // Step 4: Serialize the updated JSON object back to a string
-    char *updated_json_data = cJSON_Print(json);
-    if (!updated_json_data) {
-        printf("Failed to serialize JSON\n");
-        cJSON_Delete(json);
-        return EXIT_FAILURE;
-    }
+    // Serialize JSON to string
+    char *json_data = cJSON_Print(json);
 
-    // Step 5: Write the updated JSON back to the file
-    fatfs_write_file(filename, updated_json_data);
+    // Write JSON string to file
+    fatfs_write_file(filename, json_data);
 
-    // Step 6: Clean up
-    free(updated_json_data);
+    // Clean up
     cJSON_Delete(json);
-
-    // Unmount the FATFS file system
-    f_mount(NULL, "", 1);
-
-    printf("Scores updated successfully!\n");
-    return EXIT_SUCCESS;
+    free(json_data);
 }
