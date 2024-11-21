@@ -1132,13 +1132,15 @@ int main() {
             snprintf(testScore, sizeof(testScore), "You currently have $%d!\n", *score);
             usart1_send_string(testScore);
             for (volatile int i = 0; i < 1000000; i++);  // Delay loop
-
+            if(game_over) break; 
         }
+
+        usart1_send_string(users[user_index]); 
 
         users[user_index].score = testScore;
         char *leaderboard = saveUsernamesToJSON("board.txt", users, user_count);
         snprintf(leaderboard, sizeof(leaderboard), "Leaderboard: \n%s ", leaderboard);
-        usart1_send_string(leaderboard);
+        splitAndDisplayString(leaderboard);
 
 
 
