@@ -584,6 +584,7 @@ Question questions[MAX_QUESTIONS];      // Array of questions
 int question_count = 0;                // Total number of questions
 Username users[10];
 int user_count = 0;
+int user_index;
 
 // Key scanning
 // 16 history bytes.  Each byte represents the last 8 samples of a button.
@@ -865,14 +866,6 @@ void checkAnswer(char answer) {
     }
 }
 
-void chooseUser() {
-    if (current_row_val) {
-        if (current_col == 1) {
-            if (current_row_val)
-        }
-    }
-}
-
 void SysTick_Handler() {
     static int systick_ticks = 0;  // Counts SysTick ticks (1/16 second per tick)
 
@@ -909,10 +902,23 @@ void SysTick_Handler() {
         if (current_col == 1) { // Choose user
             if (current_row_val & 0x1) {
                 timer_countdown = 30;
-                // display list of users
-                chooseUser();
+                char userlist[50];
+                snprintf(userlist, sizeof(userlist), "Select a username and press 1 to start. 4. %s\n5. %s\n", users[0].username, users[1].username);
+                LCD_Setup(); 
+                LCD_Clear(BLACK);
+                splitAndDisplayString(userlist); 
             }
         }
+
+        if (current_col == 1 & current_row_val & 0x2) { // select user from list
+            selected_user = users[0].username;
+            user_index = 0;
+        }
+        else if (current_col == 2 & current_row_val & 0x2) {
+            selected_user = users[1].username;
+            user_index = 1;
+        }
+
 
         if (current_col == 1) { // First question
             if (current_row_val & 0x8) {
@@ -1093,8 +1099,10 @@ int main() {
     // splitAndDisplayString(question); 
 
     /* Go to the next question when timer reaches 0 */
+
+    
     loadQuestionsFromJSON("more_qs.txt", questions, &question_count);
-    loadUsernamesFromJSON("leaderboard.txt", users, &user_count);
+    loadUsernamesFromJSON("board.txt", users, &user_count);
 
 
     //while (question_index < question_count) {
@@ -1121,16 +1129,17 @@ int main() {
         *score = 0;
         while(1)
         {
-        //  usart1_send_string("LMAOOOO!\r\n");
-      //  usart1_send_char('a');
-      
-        snprintf(testScore, sizeof(testScore), "You currently have $%d!\n", *score);
-        usart1_send_string(testScore);
-       for (volatile int i = 0; i < 1000000; i++);  // Delay loop
+            snprintf(testScore, sizeof(testScore), "You currently have $%d!\n", *score);
+            usart1_send_string(testScore);
+            for (volatile int i = 0; i < 1000000; i++);  // Delay loop
 
         }
 
+        users[user_index].score = testScore;
         saveUsernamesToJSON("leaderboard.txt", users, &user_count);
+        char leaderboard [50];
+        snprintf(leaderboard, sizeof(leaderboard), "Leaderboard: \n ")
+        usart1_send_string(leaderboard);
 
 
 

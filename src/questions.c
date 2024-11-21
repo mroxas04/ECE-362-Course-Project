@@ -26,7 +26,7 @@ void loadQuestionsFromJSON(const char *filename, Question *questions, int *quest
 
     // mount that shi
     FATFS FatFs;
-    if (f_mount(&FatFs, "", 1 != FR_OK)) {
+    if (f_mount(&FatFs, "/", 1 != FR_OK)) {
         printf("Couldn't mount the sd card.");
         return;
     }
@@ -44,6 +44,8 @@ void loadQuestionsFromJSON(const char *filename, Question *questions, int *quest
     res = f_read(&file, data, fileSize, &bytesRead);
     data[fileSize] = '\0';
     f_close(&file);
+
+    f_unmount("/");
 
     // Parse json
     cJSON *json = cJSON_Parse(data);
@@ -83,6 +85,9 @@ void loadQuestionsFromJSON(const char *filename, Question *questions, int *quest
 
     cJSON_Delete(json);
     free(data);
+
+
+
 }
 
 void formatQuestionToString(char *question, size_t size, Question selected_question) {

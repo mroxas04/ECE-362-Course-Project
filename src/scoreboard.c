@@ -61,10 +61,10 @@ void fatfs_write_file(const char *filename, const char *content) {
 // Load usernames from JSON
 void loadUsernamesFromJSON(const char *filename, Username *users, int *user_count) {
     // Mount the FATFS file system
-    fr = f_mount(&fs, "", 1);
+    fr = f_mount(&fs, "/", 1);
     if (fr != FR_OK) {
         printf("Failed to mount file system (Error: %d)\n", fr);
-        return EXIT_FAILURE;
+        return;
     }
 
     char *json_data = fatfs_read_file(filename);
@@ -89,6 +89,8 @@ void loadUsernamesFromJSON(const char *filename, Username *users, int *user_coun
     }
 
     cJSON_Delete(json); // Free cJSON object
+
+    f_unmount("/");
 }
 
 // Comparator function for sorting in descending order
