@@ -1136,9 +1136,8 @@ int main() {
         }
 
         users[user_index].score = testScore;
-        saveUsernamesToJSON("leaderboard.txt", users, &user_count);
-        char leaderboard [50];
-        snprintf(leaderboard, sizeof(leaderboard), "Leaderboard: \n ")
+        char *leaderboard = saveUsernamesToJSON("board.txt", users, user_count);
+        snprintf(leaderboard, sizeof(leaderboard), "Leaderboard: \n%s ", leaderboard);
         usart1_send_string(leaderboard);
 
 

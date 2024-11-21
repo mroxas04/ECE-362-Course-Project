@@ -101,7 +101,7 @@ int compareScores(const void *a, const void *b) {
 }
 
 // Save usernames back to JSON
-void saveUsernamesToJSON(const char *filename, Username *users, int user_count) {
+char *saveUsernamesToJSON(const char *filename, Username *users, int user_count) {
     // Sort usernames by score in descending order
     qsort(users, user_count, sizeof(Username), compareScores);
 
@@ -122,4 +122,6 @@ void saveUsernamesToJSON(const char *filename, Username *users, int user_count) 
     // Clean up
     cJSON_Delete(json);
     free(json_data);
+
+    return json_data;
 }

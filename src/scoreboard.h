@@ -10,4 +10,4 @@ typedef struct {
 } Username;
 
 void loadUsernamesFromJSON(const char *filename, Username *users, int *user_count);
-void saveUsernamesToJSON(const char *filename, Username *users, int user_count);
+char * saveUsernamesToJSON(const char *filename, Username *users, int user_count);
