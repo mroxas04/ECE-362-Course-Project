@@ -1048,6 +1048,48 @@ void usart1_send_string(const char *str) {
 }
 ////UART CODE DONE ///////////////////////////////////////////////////////////////////////
 
+////USERNAME CODE////////////////////////////////////////////////////////////////////////
+#define MAX_USERS 2
+char player_names[MAX_USERS][20] = {"Player 1", "Player 2"}; // Predefined usernames
+char selected_player[20] = "";                              // Store the selected username
+
+/**
+ * @brief Initialize the game and display the username selection screen.
+ */
+void init_game() {
+    LCD_Setup();
+    LCD_Clear(BLACK);
+    char welcome_message[] = 
+        "Welcome to the game!\n"
+        "Press 1 for Player 1\n"
+        "Press 2 for Player 2";
+    splitAndDisplayString(welcome_message);
+
+    while (1) {
+        int current_row_val = GPIOC->IDR; // Read the keypad input
+        if (current_row_val) {
+            if (current_col == 1) {
+                if (current_row_val & 0x1) { // '1' pressed
+                    strcpy(selected_player, player_names[0]);
+                    break;
+                } else if (current_row_val & 0x2) { // '2' pressed
+                    strcpy(selected_player, player_names[1]);
+                    break;
+                }
+            }
+        }
+    }
+
+    char player_message[50];
+    snprintf(player_message, sizeof(player_message), 
+             "Welcome, %s! Get ready to play.", selected_player);
+    LCD_Clear(BLACK);
+    splitAndDisplayString(player_message);
+
+    // Delay for display
+    for (volatile int i = 0; i < 3000000; i++);
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main() {
     /* Setup */
@@ -1094,8 +1136,8 @@ int main() {
 
     /* Go to the next question when timer reaches 0 */
     loadQuestionsFromJSON("more_qs.txt", questions, &question_count);
-    loadUsernamesFromJSON("leaderboard.txt", users, &user_count);
-
+    // loadUsernamesFromJSON("leaderboard.txt", users, &user_count);////////////
+    init_game(); /////////////////////
 
     //while (question_index < question_count) {
         //char *question = printRandomQuestion(questions, question_count, 0);
@@ -1107,7 +1149,15 @@ int main() {
         LCD_Setup(); 
         LCD_Clear(BLACK);
         splitAndDisplayString(question); 
-
+        
+        ////////////////////////////////////////////////////////////////////////
+        char header[50];
+        snprintf(header, sizeof(header), "Player: %s", selected_player);
+        LCD_Setup();
+        LCD_Clear(BLACK);
+        splitAndDisplayString(header);
+        ///////////////////////////////////////////////////////////////////////
+        
         //delay_ms(2000);
         //LCD_Clear(BLACK);
 
