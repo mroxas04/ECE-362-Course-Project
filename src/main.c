@@ -24,7 +24,7 @@ void internal_clock();
 void init_usart1_tx();
 void usart1_send_char(char c);
 void usart1_send_string(const char *str);
-int money[7] = {100, 200, 500, 1000, 10000, 100000, 10000000};
+int money[7] = {100, 200, 500, 1000, 10000, 100000, 1000000};
 volatile int actualScore = 0;
 int* score = &actualScore;
 char *selected_user;
@@ -929,9 +929,10 @@ void SysTick_Handler() {
                 }
                 else
                 {
+                    question_index++; 
                     char *question = "\n\n\n     Congratulations! You are now are a millionaire!\n            Press # to restart"; 
                     splitAndDisplayString(question); 
-                    question_index = 0; 
+                    // question_index = 0; 
                 }
             }
         }
@@ -1126,21 +1127,27 @@ int main() {
             When in a question, you should not be able to hit 1 to go to next. */
         // init_usart1_tx(); //FOR USART
         char testScore[100];
+        char leaderboard[100];
+
         *score = 0;
         while(1)
         {
-            snprintf(testScore, sizeof(testScore), "%d", *score);
+            if(question_index >= 0)
+            {
+            snprintf(testScore, sizeof(testScore), "You currently have $%d!\n", *score);            
             usart1_send_string(testScore);
             for (volatile int i = 0; i < 1000000; i++);  // Delay loop
-            if(game_over) break; 
+            }
+            if(question_index >= 7){
+                users[user_index].score = *score;
+                //char *leaderboard = saveUsernamesToJSON("board.txt", users, user_count);
+                snprintf(leaderboard, sizeof(leaderboard), "Leaderboard: %s has won $%d", users[user_index].username, users[user_index].score);
+                usart1_send_string(leaderboard); 
+                for (volatile int i = 0; i < 1000000; i++);  // Delay loop
+                question_index = -1; 
+                *score = 0; 
+            } 
         }
-
-        usart1_send_string(users[user_index].username); 
-
-        // users[user_index].score = testScore;
-        // char *leaderboard = saveUsernamesToJSON("board.txt", users, user_count);
-        // snprintf(leaderboard, sizeof(leaderboard), "Leaderboard: \n%s ", leaderboard);
-        // splitAndDisplayString(leaderboard);
 
 
 
