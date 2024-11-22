@@ -1129,7 +1129,7 @@ int main() {
         *score = 0;
         while(1)
         {
-            snprintf(testScore, sizeof(testScore), "You currently have $%d!\n", *score);
+            snprintf(testScore, sizeof(testScore), "%d", *score);
             usart1_send_string(testScore);
             for (volatile int i = 0; i < 1000000; i++);  // Delay loop
             if(game_over) break; 
