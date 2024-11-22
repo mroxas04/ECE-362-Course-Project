@@ -1142,6 +1142,7 @@ int main() {
                 users[user_index].score = *score;
                 //char *leaderboard = saveUsernamesToJSON("board.txt", users, user_count);
                 snprintf(leaderboard, sizeof(leaderboard), "Leaderboard: %s has won $%d", users[user_index].username, users[user_index].score);
+                leaderboard[99] = 'z'; //flag to end stuff 
                 usart1_send_string(leaderboard); 
                 for (volatile int i = 0; i < 1000000; i++);  // Delay loop
                 question_index = -1; 
