@@ -621,10 +621,15 @@ int main() {
     // char username[100]; 
     // char leaderboard [100]; 
 
+LCD_Setup(); 
+LCD_Clear(BLACK); 
 
     while (1) {
         usart1_receive_string(buffer, sizeof(buffer));
+        //LCD_Clear(BLACK); 
         splitAndDisplayString(buffer);
+
+
         // if((buffer[2] < 58) && (buffer[2] > 47))
         // {
         //     score = atoi(buffer); 
