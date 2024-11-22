@@ -616,35 +616,35 @@ int main() {
     char buffer[100];
     // char *test = "hello";
     // splitAndDisplayString(test);
-    int score; 
-    char money[100]; 
-    char username[100]; 
-    char leaderboard [100]; 
+    // int score; 
+    // char money[100]; 
+    // char username[100]; 
+    // char leaderboard [100]; 
 
 
     while (1) {
         usart1_receive_string(buffer, sizeof(buffer));
         splitAndDisplayString(buffer);
-        if((buffer[2] < 58) && (buffer[2] > 47))
-        {
-            score = atoi(buffer); 
-        }
-        else{
-            memcpy(username,buffer,100); 
-        }
+        // if((buffer[2] < 58) && (buffer[2] > 47))
+        // {
+        //     score = atoi(buffer); 
+        // }
+        // else{
+        //     memcpy(username,buffer,100); 
+        // }
 
-        //NOW WRITE LOGIC TO PUT IT ON TFT 
-        if(score < 1000000)
-        {
-            sprintf(money,sizeof(money),"You currently have $%d",score); 
-        }
-        else
-        {
-            splitAndDisplayString("Leaderboard: \n"); 
-            // char *leaderboard = saveUsernamesToJSON("board.txt", users, user_count);
-            snprintf(leaderboard, sizeof(leaderboard), "\n%s won $%d ", username, score);
-            splitAndDisplayString(leaderboard);
-        }
+        // //NOW WRITE LOGIC TO PUT IT ON TFT 
+        // if(score < 1000000)
+        // {
+        //     sprintf(money,sizeof(money),"You currently have $%d",score); 
+        // }
+        // else
+        // {
+        //     splitAndDisplayString("Leaderboard: \n"); 
+        //     // char *leaderboard = saveUsernamesToJSON("board.txt", users, user_count);
+        //     snprintf(leaderboard, sizeof(leaderboard), "\n%s won $%d ", username, score);
+        //     splitAndDisplayString(leaderboard);
+        // }
 
     }
 
