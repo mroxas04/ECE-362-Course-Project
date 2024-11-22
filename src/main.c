@@ -1135,12 +1135,12 @@ int main() {
             if(game_over) break; 
         }
 
-        usart1_send_string(users[user_index]); 
+        usart1_send_string(users[user_index].username); 
 
-        users[user_index].score = testScore;
-        char *leaderboard = saveUsernamesToJSON("board.txt", users, user_count);
-        snprintf(leaderboard, sizeof(leaderboard), "Leaderboard: \n%s ", leaderboard);
-        splitAndDisplayString(leaderboard);
+        // users[user_index].score = testScore;
+        // char *leaderboard = saveUsernamesToJSON("board.txt", users, user_count);
+        // snprintf(leaderboard, sizeof(leaderboard), "Leaderboard: \n%s ", leaderboard);
+        // splitAndDisplayString(leaderboard);
 
 
 
